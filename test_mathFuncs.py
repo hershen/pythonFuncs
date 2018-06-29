@@ -77,8 +77,8 @@ def test_lorentzDot():
     v1 = [1, 2, 3, 4]
     v2 = [5, 6, 7, 8]
 
-    assert mathFuncs.lorentzDot(v1, v2) == 6
-    assert mathFuncs.lorentzDot(-np.array(v1), v2) == -6
+    assert mathFuncs.lorentzDot(v1, v2) == -6
+    assert mathFuncs.lorentzDot(-np.array(v1), v2) == 6
 
     assert mathFuncs.lorentzDot([1,2,3,4], [0,0,0,0]) == 0
 
@@ -87,12 +87,12 @@ def test_lorentzDot():
     v1 = np.array([[1,2,3, 4], [1, 2, 3, 5]])
     v2 = np.array([[1,2,3, 4], [5, 6, 7, 8]])
 
-    assert (mathFuncs.lorentzDot(v1, v2) == np.array([-2, -2])).all()
+    assert (mathFuncs.lorentzDot(v1, v2) == np.array([2, 2])).all()
 
 def test_mass():
 
-    assert mathFuncs.mass([1,2,3,3]) == np.sqrt(5)
+    assert mathFuncs.mass([1,2,3,10]) == np.sqrt(86)
     assert mathFuncs.mass([0,0,0,0]) == 0
-    
-    v = np.array([[0,0,0,0], [1,2,3,3], [1,2,3,np.sqrt(14)]])
-    assert (mathFuncs.mass(v) == np.array([0,np.sqrt(5), 0])).all()
+
+    v = np.array([[0,0,0,0], [1,2,3,10], [1,2,3,np.sqrt(14)]])
+    assert (mathFuncs.mass(v) == np.array([0, np.sqrt(86), 0])).all()
