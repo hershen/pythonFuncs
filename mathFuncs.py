@@ -29,7 +29,7 @@ def lorentzDot(v1, v2):
     if isinstance(v1, list) or v1.ndim < 2:
         return multiplied[3] - np.sum(multiplied[:3])
 
-    return multiplied[:, 3] - np.sum(multiplied[:, :3], axis=1)
+    return multiplied[:, 3] - multiplied[:, 0] - multiplied[:, 1] - multiplied[:, 2]
 
 def mass2(lorentzVector):
     """Get mass of lorentz vector squared"""
