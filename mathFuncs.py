@@ -46,3 +46,15 @@ def cosHelicity1(grandParent, parent, daughter):
     grandparent, parent and daughter are P, Q, D in that equation
     """
     return (lorentzDot(grandParent,daughter)*mass2(parent) - lorentzDot(grandParent,parent)*lorentzDot(parent,daughter))/np.sqrt((lorentzDot(grandParent,parent)**2 - mass2(parent)*mass2(grandParent))*(lorentzDot(parent,daughter)**2 - mass2(parent)*mass2(daughter)))
+
+def effError(nom, denom):
+    """Calculate efficiency error using binomial distribution
+    eff = nom / denom
+
+    Does not represent errors close to 0 or 1!!!
+    Can be extended to include edge cases with CDF note 5894"""
+
+    nom, denom = np.asarray(nom, dtype=float), np.asarray(denom)
+    eff = nom/denom
+
+    return np.sqrt(eff*(1-eff)/denom)

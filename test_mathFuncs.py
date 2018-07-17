@@ -96,3 +96,11 @@ def test_mass():
 
     v = np.array([[0,0,0,0], [1,2,3,10], [1,2,3,np.sqrt(14)]])
     assert (mathFuncs.mass(v) == np.array([0, np.sqrt(86), 0])).all()
+
+def test_effError():
+    assert mathFuncs.effError(0.5,1) == 0.5
+    assert np.allclose(mathFuncs.effError(np.array([8,5]), np.array([10,10])) , np.array([math.sqrt(0.8*0.2/10), math.sqrt(0.5*0.5/10)]) )
+
+    #These 2 are not strictly correct. They're correct for the current formula
+    assert mathFuncs.effError(0,1) == 0
+    assert mathFuncs.effError(1,1) == 0
