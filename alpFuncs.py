@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import re
 
 def getMass(filename):
     """Return mass from the filename"""
@@ -11,7 +12,10 @@ def getMass(filename):
 def getRun(filename):
     """Return Run from the filename"""
 
-    #remove up to 'mass'
-    filename = filename[filename.find('Run') + 3:]
+    #string after run
+    postRunLoc = filename.find('.01.')
 
-    return filename[:filename.find('.')]
+    #remove up to 'mass'
+    preRunLoc = re.search('_.-', filename).end() + 3 #+3 for either 'Run' or 'Ups'
+
+    return filename[preRunLoc:postRunLoc]
