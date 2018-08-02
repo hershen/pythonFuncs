@@ -29,6 +29,10 @@ def saveFig(fig, filename):
     """ Save a pyplot figure """
     filename, ext = os.path.splitext(filename)
 
+    #Create figureDump dir
+    if not os.path.isdir('figureDump'):
+        os.mkdir('figureDump')
+
     #If extension included, save only thatfiletype
     if ext:
         if ext == '.pl':
