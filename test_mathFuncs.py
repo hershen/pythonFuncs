@@ -59,7 +59,7 @@ def test_angleBetween():
     assert mathFuncs.angleBetween([1, 2, 3], [4, 5, 6]) == math.acos(
         (4 + 10 + 18) / math.sqrt(1 + 4 + 9) / math.sqrt(16 + 25 + 36))
 
-    with pytest.warns(RuntimeWarning, match='invalid value encountered in divide'):
+    with pytest.warns(RuntimeWarning, match='invalid value encountered in true_divide'):
         assert np.isnan(mathFuncs.angleBetween([0, 0, 0], [0, 0, 0]))
 
     assert np.isnan(mathFuncs.angleBetween([np.nan, 0, 0], [0, 0, 0]))
@@ -136,3 +136,16 @@ def test_phi_xyz():
 
     # x nan
     assert np.isnan(mathFuncs.phi_xyz(np.nan, 2, 3))
+
+
+def test_novosibirsk():
+    #values taken from using my c++ implementation
+    assert mathFuncs.novosibirsk(0.5,0.5,0.5,1,1) == 0.3482433775621212591
+
+    x = [0.5,1,2,3]
+
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1) , np.array([0.3482433775621212591,0.2498417691242378613, 0, 0]))
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.3, 0.7, 0.1, 0.5),
+                       np.array([0.09236319105347574887, 0, 0, 0]))
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.1, 0.7, 0.9, -1),
+                       np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815, 0.02290351914617567639]))

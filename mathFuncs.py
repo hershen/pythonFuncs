@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 import numpy as np
+import math
 
+_sln4 = math.sqrt(math.log(4))
 
 def vectorDot(v1, v2):
     """Return dot product of vectors v1 and v2
@@ -31,9 +33,7 @@ def angleBetween(v1, v2):
     v1norms = np.linalg.norm(v1) if isinstance(v1, list) or v1.ndim < 2 else np.linalg.norm(v1, axis=1)
     v2norms = np.linalg.norm(v2) if isinstance(v2, list) or v2.ndim < 2 else np.linalg.norm(v2, axis=1)
 
-    # comment
-
-    return np.arccos(vectorDot(v1, v2) / v1norms / v2norms)
+    return np.arccos(np.true_divide(np.true_divide(vectorDot(v1, v2), v1norms) , v2norms))
 
 
 def lorentzDot(v1, v2):
@@ -81,3 +81,38 @@ def effError(nom, denom):
     eff = nom / denom
 
     return np.sqrt(eff * (1 - eff) / denom)
+
+
+def novosibirsk(x, norm, peak, width, eta):
+    """Novosibirsk function
+    See H. Ikeda et al. / Nuclear Instruments and Methods in Physics Research A 441 (2000) 401-426
+    """
+
+    x = np.asarray(x, dtype=float)
+
+    # If the tail variable is small enough, this is just a Gaussian.
+    if abs(eta) < 1e-7:
+        return norm * np.exp(-0.5 * (x - peak) * (x - peak) / width / width)
+
+    lnArg = 1.0 - (x - peak) * eta / width
+
+    # Argument of logarithm negative. Real continuation -> function equals zero
+    # calculate values only for lnArg non zero.
+    lnArgNonZero = lnArg > 1e-7
+
+    lnArg = lnArg[lnArgNonZero]
+
+    log = np.log(lnArg)
+
+    etaSln4 = eta * _sln4
+
+    sigmaZero2 = (math.log(etaSln4 + math.sqrt(1.0 + etaSln4 * etaSln4)) / _sln4)**2
+
+    exponent = -0.5 / sigmaZero2 * log **2 - 0.5 * sigmaZero2
+
+
+    result = np.zeros_like(x)
+    result[lnArgNonZero] = norm * np.exp(exponent)
+
+    return result
+
