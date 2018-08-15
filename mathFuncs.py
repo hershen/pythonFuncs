@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 import numpy as np
 import math
+from scipy.special import erf
 
 _sln4 = math.sqrt(math.log(4))
+
 
 def vectorDot(v1, v2):
     """Return dot product of vectors v1 and v2
@@ -33,7 +35,7 @@ def angleBetween(v1, v2):
     v1norms = np.linalg.norm(v1) if isinstance(v1, list) or v1.ndim < 2 else np.linalg.norm(v1, axis=1)
     v2norms = np.linalg.norm(v2) if isinstance(v2, list) or v2.ndim < 2 else np.linalg.norm(v2, axis=1)
 
-    return np.arccos(np.true_divide(np.true_divide(vectorDot(v1, v2), v1norms) , v2norms))
+    return np.arccos(np.true_divide(np.true_divide(vectorDot(v1, v2), v1norms), v2norms))
 
 
 def lorentzDot(v1, v2):
@@ -83,6 +85,12 @@ def effError(nom, denom):
     return np.sqrt(eff * (1 - eff) / denom)
 
 
+def _sigmaZero(eta):
+    etaSln4 = eta * _sln4
+
+    return math.log(etaSln4 + math.sqrt(1.0 + etaSln4 ** 2)) / _sln4
+
+
 def novosibirsk(x, norm, peak, width, eta):
     """Novosibirsk function
     See H. Ikeda et al. / Nuclear Instruments and Methods in Physics Research A 441 (2000) 401-426
@@ -104,15 +112,36 @@ def novosibirsk(x, norm, peak, width, eta):
 
     log = np.log(lnArg)
 
-    etaSln4 = eta * _sln4
+    sigmaZero2 = _sigmaZero(eta) ** 2
 
-    sigmaZero2 = (math.log(etaSln4 + math.sqrt(1.0 + etaSln4 * etaSln4)) / _sln4)**2
-
-    exponent = -0.5 / sigmaZero2 * log **2 - 0.5 * sigmaZero2
-
+    exponent = -0.5 / sigmaZero2 * log ** 2 - 0.5 * sigmaZero2
 
     result = np.zeros_like(x)
+
     result[lnArgNonZero] = norm * np.exp(exponent)
 
     return result
 
+
+def novosibirsk_cdf(x, norm, peak, width, eta):
+    """Novosibirsk function
+    See H. Ikeda et al. / Nuclear Instruments and Methods in Physics Research A 441 (2000) 401-426
+    """
+
+    x = np.asarray(x, dtype=float)
+
+    sigmaZero = _sigmaZero(eta)
+
+    return np.sqrt(np.pi / 2.) * norm * width * sigmaZero / eta * erf(
+        (sigmaZero ** 2 - np.log(1 - (x - peak) / width)) / math.sqrt(2) / sigmaZero)
+
+
+def novosibirsk_norm(eta, width):
+    sigmaZero = _sigmaZero(eta)
+    return math.sqrt(2. / np.pi) * eta / sigmaZero / width / (erf(sigmaZero / math.sqrt(2)) - erf())
+
+
+def listCenters(myList):
+    myList = np.asarray(myList)
+
+    return 0.5 * (myList[:-1] + myList[1:])

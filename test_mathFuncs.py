@@ -139,13 +139,22 @@ def test_phi_xyz():
 
 
 def test_novosibirsk():
-    #values taken from using my c++ implementation
-    assert mathFuncs.novosibirsk(0.5,0.5,0.5,1,1) == 0.3482433775621212591
+    # values taken from using my c++ implementation
+    assert mathFuncs.novosibirsk(0.5, 0.5, 0.5, 1, 1) == 0.3482433775621212591
 
-    x = [0.5,1,2,3]
+    x = [0.5, 1, 2, 3]
 
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1) , np.array([0.3482433775621212591,0.2498417691242378613, 0, 0]))
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1),
+                       np.array([0.3482433775621212591, 0.2498417691242378613, 0, 0]))
     assert np.allclose(mathFuncs.novosibirsk(x, 0.3, 0.7, 0.1, 0.5),
                        np.array([0.09236319105347574887, 0, 0, 0]))
     assert np.allclose(mathFuncs.novosibirsk(x, 0.1, 0.7, 0.9, -1),
-                       np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815, 0.02290351914617567639]))
+                       np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815,
+                                 0.02290351914617567639]))
+
+
+def test_listCenters():
+    assert mathFuncs.listCenters([]).size == 0
+    assert mathFuncs.listCenters([1]).size == 0
+    assert mathFuncs.listCenters([1, 2]) == np.array([1.5])
+    assert (mathFuncs.listCenters(np.array([1, 2, 3, 4, 5, 6])) == np.array([1.5, 2.5, 3.5, 4.5, 5.5])).all()
