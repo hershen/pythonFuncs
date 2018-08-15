@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import re
-
+import uproot
+import pandas as pd
 
 def getMass(filename):
     """Return mass from the filename"""
@@ -21,3 +22,18 @@ def getRun(filename):
     preRunLoc = re.search('_.-', filename).end() + 3  # +3 for either 'Run' or 'Ups'
 
     return filename[preRunLoc:postRunLoc]
+
+
+def loadDF(filenames, columns=None, tree="ntp1"):
+    dfs = []
+
+    for i, tmpDF in enumerate(uproot.iterate(filenames, tree, columns, outputtype=pd.DataFrame)):
+        dfs.append(tmpDF)
+
+    # Concat at end
+    df = pd.concat(dfs)
+
+    # change column names to strings
+    df.columns = df.columns.astype(str)
+
+    return df
