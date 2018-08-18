@@ -153,8 +153,81 @@ def test_novosibirsk():
                                  0.02290351914617567639]))
 
 
+def test_novosibirsk():
+    # values taken from using my c++ implementation
+    assert mathFuncs.novosibirsk(0.5, 0.5, 0.5, 1, 1) == 0.3482433775621212591
+
+    x = [0.5, 1, 2, 3]
+
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1),
+                       np.array([0.3482433775621212591, 0.2498417691242378613, 0, 0]))
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.3, 0.7, 0.1, 0.5),
+                       np.array([0.09236319105347574887, 0, 0, 0]))
+    assert np.allclose(mathFuncs.novosibirsk(x, 0.1, 0.7, 0.9, -1),
+                       np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815,
+                                 0.02290351914617567639]))
+
+
 def test_listCenters():
     assert mathFuncs.listCenters([]).size == 0
     assert mathFuncs.listCenters([1]).size == 0
     assert mathFuncs.listCenters([1, 2]) == np.array([1.5])
     assert (mathFuncs.listCenters(np.array([1, 2, 3, 4, 5, 6])) == np.array([1.5, 2.5, 3.5, 4.5, 5.5])).all()
+
+
+def test_novosibirskForTf1():
+    x = [0.5]
+    params = [10, 2, 0.1, 0.5]
+    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
+                                                                                                                params)).all()
+
+    params = [10, 2, 1, 0.5]
+    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
+                                                                                                                params)).all()
+    params = [10, 2, 4, -0.5]
+    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
+                                                                                                                params)).all()
+    params = [10, 0.1, 0.5, -0.1]
+    print(mathFuncs.novosibirsk(x, params[1], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
+                                                                                                              params))
+    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
+                                                                                                                params)).all()
+
+
+def test_gaussExp():
+    assert mathFuncs.gaussExp(1, 10, 0, 1, 0) == 6.065306597126334236
+    assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
+    assert mathFuncs.gaussExp(1, 10, 0, 1, 1.01) == 6.065306597126334236
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.5) == 6.065306597126334236
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -2) == 10
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -5) == 18080.42414456063206903801
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -10) == 2353852668370199854.07899910749034804509
+
+
+def test_gaussExpForTf1():
+    x = [0.5]
+    params = [10, 2, 0.1, 0.5]
+    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
+                                                                                                          params)).all()
+
+    params = [10, 2, 1, 0.5]
+    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
+                                                                                                          params)).all()
+    params = [10, 2, 4, -0.5]
+    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
+                                                                                                          params)).all()
+    params = [10, 0.1, 0.5, -0.1]
+    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
+                                                                                                          params)).all()
+
+
+def test_idicesPercentageOfMax():
+    x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10., 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    assert mathFuncs.indicesPercentageOfMax(x, 51) == (5, 13)
+
+    assert mathFuncs.indicesPercentageOfMax(x, 41) == (4, 14)
+    assert mathFuncs.indicesPercentageOfMax(x, 40) == (3, 15)
+    assert mathFuncs.indicesPercentageOfMax(x, 39) == (3, 15)
+
+    assert mathFuncs.indicesPercentageOfMax(x, 0) == (9, 9)
+    assert mathFuncs.indicesPercentageOfMax(x, 100) == (9, 9)
