@@ -197,3 +197,24 @@ def indicesPercentageOfMax(x, percentage):
     lowIdx = maxElement if firstSmallerLowSide == 0 else maxElement - firstSmallerLowSide + 1
 
     return lowIdx, highIdx
+
+
+def calcPulls(measuredValues, stds, expectedValues):
+    """
+    Calculate pulls
+    :param measuredValues:
+    :param stds:
+    :param expectedValues:
+    :return: (measuredValues - expectedValues)/stds
+    """
+    measuredValues = np.atleast_1d(measuredValues)
+    stds = np.atleast_1d(np.asarray(stds, dtype=float))
+    expectedValues = np.atleast_1d(expectedValues)
+
+    # sanity
+    assert len(measuredValues) == len(stds), "measuredValues size {} != stds size {}".format(len(measuredValues),
+                                                                                             len(stds))
+    assert len(measuredValues) == len(expectedValues), "measuredValues size {} != expectedValues size {}".format(
+        len(measuredValues), len(expectedValues))
+
+    return (measuredValues - expectedValues) / stds

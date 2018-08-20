@@ -3,6 +3,7 @@ import mathFuncs
 import math
 import numpy as np
 import pytest
+from ROOT import TF1
 
 
 def test_vectorDot():
@@ -231,3 +232,20 @@ def test_idicesPercentageOfMax():
 
     assert mathFuncs.indicesPercentageOfMax(x, 0) == (9, 9)
     assert mathFuncs.indicesPercentageOfMax(x, 100) == (9, 9)
+
+
+def test_calcPulls():
+    with pytest.raises(AssertionError):
+        mathFuncs.calcPulls([1], [2, 2], [3])
+
+    with pytest.raises(AssertionError):
+        mathFuncs.calcPulls([1, 1], [2, 2], [3])
+
+    assert mathFuncs.calcPulls(1, 3, 2) == -1. / 3
+
+    with pytest.warns(RuntimeWarning):
+        assert np.isneginf(mathFuncs.calcPulls(1, 0, 2))
+        assert np.isposinf(mathFuncs.calcPulls(2, 0, 1))
+        assert np.isnan(mathFuncs.calcPulls(1, 0, 1))
+
+    np.testing.assert_allclose(mathFuncs.calcPulls([1, 2, 3], [0.1, 1, 10], [1, 4, 7]), np.array([0, -2, -0.4]))
