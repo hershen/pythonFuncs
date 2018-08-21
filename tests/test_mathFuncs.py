@@ -233,6 +233,10 @@ def test_idicesPercentageOfMax():
     assert mathFuncs.indicesPercentageOfMax(x, 0) == (9, 9)
     assert mathFuncs.indicesPercentageOfMax(x, 100) == (9, 9)
 
+    # maximum is zero - expect fail
+    with pytest.raises(ValueError):
+        mathFuncs.indicesPercentageOfMax([0, 0, 0], 40)
+
 
 def test_calcPulls():
     with pytest.raises(AssertionError):
@@ -249,3 +253,28 @@ def test_calcPulls():
         assert np.isnan(mathFuncs.calcPulls(1, 0, 1))
 
     np.testing.assert_allclose(mathFuncs.calcPulls([1, 2, 3], [0.1, 1, 10], [1, 4, 7]), np.array([0, -2, -0.4]))
+
+
+def test_cosHelicity():
+    """
+    cosHelicity values calculated with c function from https://www.slac.stanford.edu/BFROOT/www/doc/workbook/analysis/analysis.html#helicity
+    These give the negative value of my function.
+    The numbers for the momentum vector components were drawn from a Gaus(0,5), and the mass from Uniform(0,5)
+    """
+    assert np.isclose(mathFuncs.cosHelicity(np.array([1.483607321, -1.057359938, 4.64859099, 5.125154677]),
+                                            np.array([-2.872029834, -2.696355793, -10.83872179, 11.63641534]),
+                                            np.array([-9.360268377, 5.374778891, -7.668973941, 13.77497287])),
+                      -0.9621238708)
+
+    assert np.isclose(mathFuncs.cosHelicity(np.array([-5.053961598, 0.2945919288, 7.497966283, 10.0386344]),
+                                            np.array([3.004968973, 2.161233848, 4.120989493, 6.214798517]),
+                                            np.array([13.40814548, -2.011223834, -2.179347456, 13.93400376])),
+                      -0.3659081757)
+    assert np.isclose(mathFuncs.cosHelicity(np.array([2.816980283, 6.081124253, -9.421044698, 11.56563981]),
+                                            np.array([0.642004394, -1.252326062, 3.879911562, 4.638644664]),
+                                            np.array([-2.06614717, -5.495463191, -3.781723353, 7.882918615])),
+                      -0.9164004326)
+    assert np.isclose(mathFuncs.cosHelicity(np.array([0.3033471748, -2.666406462, 0.1447857893, 4.698073577]),
+                                            np.array([-3.794295829, -4.722211459, -0.658236281, 6.480472775]),
+                                            np.array([-1.476877853, 3.277558051, -12.70315193, 13.21825152])),
+                      -0.878118217)

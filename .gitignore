@@ -2,6 +2,9 @@
 __pycache__
 *.pyc
 
+#pycharm
+.idea
+
 #pytest-cov
 htmlcov
 .coverage

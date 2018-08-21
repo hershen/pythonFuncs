@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 import alpFuncs
-
-# import pytest
+from pandas import DataFrame
+from pandas.testing import assert_frame_equal
+from root_numpy import array2root
+from numpy import int32, float32, float64, array
+import pytest
 
 filename_Run3 = 'flat_mass7.00e+00_coup1.0000e-03_ISR_numEvents50000_1-Run3.01.root'
 filename_Y2S = 'flat_mass8.50e+00_coup1.0000e-03_Y2S_ISR_numEvents2500_3-Ups2S.01.root'
@@ -18,3 +21,19 @@ def test_getRun():
     assert alpFuncs.getRun(filename_Run3) == '3'
     assert alpFuncs.getRun(filename_Y2S) == '2S'
     assert alpFuncs.getRun(filename_Y3S) == '3S'
+
+
+def test_loadDF(tmpdir):
+    # create dataframe
+    numpyArray = array([(1, 2.5, 3.4), (4, 5, 6.8)], dtype=[('a', float), ('b', float32), ('c', float64)])
+    df = DataFrame(numpyArray)
+
+    # write dataframe
+    tempFile = tmpdir.join("pandas.root")
+
+    # Write array to file
+    array2root(numpyArray, str(tempFile), treename='ntp1', mode='recreate')
+
+    # Check arrays equal
+    with pytest.warns(FutureWarning):
+        assert_frame_equal(alpFuncs.loadDF(str(tempFile)), df)

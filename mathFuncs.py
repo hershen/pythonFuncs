@@ -60,7 +60,7 @@ def mass(lorentzVector):
     return np.sqrt(mass2(lorentzVector))
 
 
-def cosHelicity1(grandParent, parent, daughter):
+def cosHelicity(grandParent, parent, daughter):
     """ Calculate cosine helicity of the daughter.
     grandParent, parent, daughter are the 4 vectors of the particles in any frame
     Taken from BAD522 v6, page 120, eq. 141
@@ -180,7 +180,7 @@ def indicesPercentageOfMax(x, percentage):
     x = np.asarray(x)
     maxElement = x.argmax()
     if np.abs(maxElement) < 1e-7:
-        raise RuntimeError("Maximum element is {}. This won't work.".format(np.abs(maxElement)))
+        raise ValueError("Maximum element is {}. This won't work.".format(np.abs(maxElement)))
 
     threshold = percentage / 100. * x[maxElement]
 

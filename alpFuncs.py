@@ -3,6 +3,7 @@ import re
 import uproot
 import pandas as pd
 
+
 def getMass(filename):
     """Return mass from the filename"""
 
