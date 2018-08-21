@@ -2,9 +2,9 @@
 import pickle as pl
 import os
 from ROOT import TCanvas, TGraph, kFALSE, TH1
-from root_numpy import fill_graph
 from numpy import abs, ceil, atleast_1d, asarray
 from mathFuncs import calcPulls
+from root_numpy import evaluate, hist2array
 
 
 def getHistBinEdges_topsFromAxes(axes):
@@ -98,116 +98,134 @@ def getXvalues(rootObj):
 
     raise ValueError("{} is not supported".format(type(rootObj)))
 
+
+def calcPulls_graphErrors(graphErrors, modelFunc):
+    """
+    Calculate pulls of model function at each (x,y) value of graph
+    :param graphErrors:
+    :param modelFunc:
+    :return:
+    """
+    yValues = [y for y in graphErrors.GetY()]
+    stds = [ey for ey in graphErrors.GetEY()]
+
+    xValues = getXvalues(graphErrors)
+    expectedValues = evaluate(modelFunc, xValues)
+    return calcPulls(yValues, stds, expectedValues)
+
+
+def calcPulls_TH1(hist, modelFunc):
+    """
+    Calculate pulls of model function at hist bin centers
+    :param hist:
+    :param modelFunc:
+    :return:
+    """
+    yValues = hist2array(hist)
+    stds = [hist.GetBinError(iBin) for iBin in range(1, hist.GetNbinsX() + 1)]
+
+    xValues = getXvalues(hist)
+    expectedValues = evaluate(modelFunc, xValues)
+    return calcPulls(yValues, stds, expectedValues)
+
+
 class ResidualCanvas:
-    _residualGraph
-    __init__(canvas, topObject, function):
-        assert function.IsValid(), "ResidualCanvas::ResidualCanvas: function isn't valid."
+    def __init__(self, canvas, topObject, func):
+        assert func.IsValid(), "ResidualCanvas::ResidualCanvas: function isn't valid."
 
-        self.prepareCanvas()
+        self.canvas = canvas
+        self.topObject = topObject
+        self.function = func
 
-        const auto residuals(myFuncs::calcResiduals(m_topObject, m_function));
+        self._prepareCanvas()
 
-        _residualGraph = TGraph(getResidualsGraph(myFuncs::getXvalues(topObject), residuals));
+        residuals = calcPulls_graphErrors(self.topObject, self.function)
 
-        self.prepareObjects()
-#
-#   void draw() {
-#     m_topPad->cd();
-#     m_topObject.Draw("AP");
-#     m_function.Draw("Same");
-#
-#     m_bottomPad->cd();
-#     m_residualGraph.Draw("AP");
-#   }
-#
-#   TPad* getTopPad() const { return m_topPad; }
-#   TPad* getBottomPad() const { return m_bottomPad; }
-#   TGraph getResidualGraph() const { return m_residualGraph; }
-#
-# private:
-#   TCanvas& m_canvas;
-#   topType& m_topObject;
-#   TF1& m_function;
-#   TGraph m_residualGraph;
-#   TPad* m_topPad;
-#   TPad* m_bottomPad;
-#
-#   void prepareCanvas() {
-#
-#     const double bottomPadYpercentage = 0.22;
-#     const double bottomTopSeperation = 0.05;
-#
-#     m_canvas.cd();
-#     m_topPad = new TPad((m_canvas.GetName() + std::string("_topPad")).data(), "", 0, bottomPadYpercentage, 1, 1);
-#     m_topPad->SetNumber(1);
-#     m_topPad->Draw();
-#
-#     // can't set margins with m_topPad->Set__Margin() for some reason. Have to go through m_canvas.cd(x)...
-#     m_canvas.cd(1)->SetBottomMargin(0.01);
-#     // Change to canvas before creating second pad
-#     m_canvas.cd();
-#
-#     m_bottomPad = new TPad((m_canvas.GetName() + std::string("_bottomPad")).data(), "", 0, 0, 1, bottomPadYpercentage);
-#     m_bottomPad->SetNumber(2);
-#
-#     m_bottomPad->Draw();
-#     m_canvas.cd(2)->SetTopMargin(bottomTopSeperation);
-#     m_canvas.cd(2)->SetBottomMargin(gStyle->GetPadBottomMargin() * 1.5);
-#     m_bottomPad->SetGridy();
-#
-#     m_canvas.cd();
-#   }
-#
-#   // Prepare objects for drawing in a prettyResidualGraph
-#   void prepareObjects() {
-#     m_topObject.GetXaxis()->SetLabelSize(0.0); // Don't draw x labels on top object
-#     // m_topObject.GetXaxis()->SetTitleSize(0.0); // Don't draw x title on top object
-#
-#     // Set axis label and Title size to absolute
-#     m_topObject.GetYaxis()->SetLabelFont(43);     // Absolute font size in pixel (precision 3)
-#     m_residualGraph.GetXaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
-#     m_residualGraph.GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
-#     // Title
-#     m_topObject.GetYaxis()->SetTitleFont(43);     // Absolute font size in pixel (precision 3)
-#     m_residualGraph.GetXaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
-#     m_residualGraph.GetYaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
-#
-#     // Set x + y axis label size
-#     const double labelSize = std::min(0.03 * m_canvas.cd(1)->GetWh(), 0.03 * m_canvas.cd(1)->GetWw());
-#     m_topObject.GetYaxis()->SetLabelSize(labelSize);
-#
-#     m_residualGraph.GetYaxis()->SetLabelSize(labelSize);
-#     // x axis
-#     m_residualGraph.GetXaxis()->SetLabelSize(labelSize);
-#
-#     // Set axis title sizes
-#     const double titleSize = std::min(0.03 * m_canvas.cd(1)->GetWh(), 0.03 * m_canvas.cd(1)->GetWw());
-#     m_residualGraph.GetXaxis()->SetTitleSize(titleSize);
-#     m_residualGraph.GetYaxis()->SetTitleSize(titleSize);
-#     m_topObject.GetYaxis()->SetTitleSize(titleSize);
-#
-#     // Set title offsets
-#     m_residualGraph.GetXaxis()->SetTitleOffset(3.75);
-#
-#     // Set bottom x title
-#     m_residualGraph.GetXaxis()->SetTitle(m_topObject.GetXaxis()->GetTitle());
-#     // Set y title
-#     m_residualGraph.GetYaxis()->SetTitle("Pull (#sigma)");
-#
-#     // Set residual y axis divisions
-#     const auto maxResidual =
-#         std::abs(*std::max_element(m_residualGraph.GetY(), m_residualGraph.GetY() + m_residualGraph.GetN() - 1,
-#                                    [](const double residual1, const double residual2) { // find max absolute value residual
-#                                      return std::abs(residual1) < std::abs(residual2);
-#                                    }));
-#     m_residualGraph.SetMaximum(std::ceil(maxResidual));
-#     m_residualGraph.SetMinimum(-std::ceil(maxResidual));
-#     const int maxDivisions = std::min(5., std::ceil(maxResidual));
-#     m_residualGraph.GetYaxis()->SetNdivisions(maxDivisions, false); // false - no optimization - forces current value
-#
-#     // Set marker size
-#     double markerSize = myFuncs::linearInterpolate(100, 17500, 1.2, 0.1, m_residualGraph.GetN());
-#     // markerSize = std::min(static_cast<double>(gStyle->GetMarkerSize()), markerSize);
-#     m_residualGraph.SetMarkerSize(markerSize);
-#   }
-# };
+        self.residualGraph = TGraph(getPullGraph(getXvalues(self.topObject), residuals));
+
+        # self.prepareObjects()
+
+    #
+    #
+    def draw(self):
+        self.canvas.GetPad(1).cd()
+        self.topObject.Draw("AP")
+        self.function.Draw("Same")
+
+        self.canvas.GetPad(2).cd()
+        self.residualGraph.Draw("AP")
+
+    def _prepareCanvas(self, bottomPadYpercentage=0.22, bottomTopSeperation=0.05):
+        """
+        Prepare the top and botom canvases
+        :param bottomPadYpercentage:
+        :param bottomTopSeperation:
+        :return:
+        """
+        self.canvas.cd()
+        self.canvas.Divide(1, 2)
+        self.canvas.GetPad(1).SetPad(0.0, bottomPadYpercentage, 1, 1)
+        self.canvas.GetPad(1).SetBottomMargin(bottomTopSeperation)
+        self.canvas.GetPad(1).SetRightMargin(0.05)
+        self.canvas.GetPad(2).SetPad(0.0, 0.0, 1, bottomPadYpercentage)
+        self.canvas.GetPad(2).SetBottomMargin(0.32)
+        self.canvas.GetPad(2).SetTopMargin(0.0)
+        self.canvas.GetPad(2).SetRightMargin(0.05)
+        self.canvas.GetPad(2)
+        self.canvas.GetPad(2).SetGridy()
+
+        self.canvas.cd()
+# #
+# #   // Prepare objects for drawing in a prettyResidualGraph
+# #   void prepareObjects() {
+# #     mtopObject.GetXaxis()->SetLabelSize(0.0); // Don't draw x labels on top object
+# #     // mtopObject.GetXaxis()->SetTitleSize(0.0); // Don't draw x title on top object
+# #
+# #     // Set axis label and Title size to absolute
+# #     mtopObject.GetYaxis()->SetLabelFont(43);     // Absolute font size in pixel (precision 3)
+# #     mresidualGraph.GetXaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
+# #     mresidualGraph.GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
+# #     // Title
+# #     mtopObject.GetYaxis()->SetTitleFont(43);     // Absolute font size in pixel (precision 3)
+# #     mresidualGraph.GetXaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
+# #     mresidualGraph.GetYaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
+# #
+# #     // Set x + y axis label size
+# #     const double labelSize = std::min(0.03 * mcanvas.cd(1)->GetWh(), 0.03 * mcanvas.cd(1)->GetWw());
+# #     mtopObject.GetYaxis()->SetLabelSize(labelSize);
+# #
+# #     mresidualGraph.GetYaxis()->SetLabelSize(labelSize);
+# #     // x axis
+# #     mresidualGraph.GetXaxis()->SetLabelSize(labelSize);
+# #
+# #     // Set axis title sizes
+# #     const double titleSize = std::min(0.03 * mcanvas.cd(1)->GetWh(), 0.03 * mcanvas.cd(1)->GetWw());
+# #     mresidualGraph.GetXaxis()->SetTitleSize(titleSize);
+# #     mresidualGraph.GetYaxis()->SetTitleSize(titleSize);
+# #     mtopObject.GetYaxis()->SetTitleSize(titleSize);
+# #
+# #     // Set title offsets
+# #     mresidualGraph.GetXaxis()->SetTitleOffset(3.75);
+# #
+# #     // Set bottom x title
+# #     mresidualGraph.GetXaxis()->SetTitle(mtopObject.GetXaxis()->GetTitle());
+# #     // Set y title
+# #     mresidualGraph.GetYaxis()->SetTitle("Pull (#sigma)");
+# #
+# #     // Set residual y axis divisions
+# #     const auto maxResidual =
+# #         std::abs(*std::max_element(mresidualGraph.GetY(), mresidualGraph.GetY() + mresidualGraph.GetN() - 1,
+# #                                    [](const double residual1, const double residual2) { // find max absolute value residual
+# #                                      return std::abs(residual1) < std::abs(residual2);
+# #                                    }));
+# #     mresidualGraph.SetMaximum(std::ceil(maxResidual));
+# #     mresidualGraph.SetMinimum(-std::ceil(maxResidual));
+# #     const int maxDivisions = std::min(5., std::ceil(maxResidual));
+# #     mresidualGraph.GetYaxis()->SetNdivisions(maxDivisions, false); // false - no optimization - forces current value
+# #
+# #     // Set marker size
+# #     double markerSize = myFuncs::linearInterpolate(100, 17500, 1.2, 0.1, mresidualGraph.GetN());
+# #     // markerSize = std::min(static_cast<double>(gStyle->GetMarkerSize()), markerSize);
+# #     mresidualGraph.SetMarkerSize(markerSize);
+# #   }
+# # };

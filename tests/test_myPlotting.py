@@ -21,3 +21,4 @@ def test_getXvalues():
     np.testing.assert_array_almost_equal(myPlotting.getXvalues(graph), [0.0, 0.0])
     graph.SetPoint(2, 10, 1)
     np.testing.assert_array_almost_equal(myPlotting.getXvalues(graph), [0.0, 0.0, 10])
+
