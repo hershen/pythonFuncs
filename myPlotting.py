@@ -23,37 +23,39 @@ def getHistBinEdges_topsFromAxes(axes):
     return binEdges, tops
 
 
-def _saveFigFlat(fig, filename):
+def _saveFigFlat(fig, fullFilename):
     """ filename should contain extension"""
-    fig.savefig('figureDump/{}'.format(filename), dpi=300)
+    fig.savefig('{}'.format(fullFilename), dpi=300)
 
 
-def _saveFigPickled(fig, filename):
+def _saveFigPickled(fig, fullFilename):
     """ filename should contain extension"""
-    pl.dump(fig, open('figureDump/{}'.format(filename), 'wb'))
+    pl.dump(fig, open('{}'.format(fullFilename), 'wb'))
 
 
-def saveFig(fig, filename):
+def saveFig(fig, filename, folder='.'):
     """ Save a pyplot figure """
-    filename, ext = os.path.splitext(filename)
 
-    # Create figureDump dir
-    if not os.path.isdir('figureDump'):
-        os.mkdir('figureDump')
+    fullDir = os.path.join(folder, 'figureDump')
+
+    # Create dir
+    if not os.path.isdir(fullDir):
+        os.mkdir(fullDir)
 
     # If extension included, save only thatfiletype
+    filename, ext = os.path.splitext(filename)
+    fullFilename_noExt = os.path.join(fullDir, filename)
     if ext:
         if ext == '.pl':
-            _saveFigPickled(fig, filename + ext)
+            _saveFigPickled(fig, fullFilename_noExt + ext)
         else:
-            _saveFigFlat(fig, filename + ext)
+            _saveFigFlat(fig, fullFilename_noExt + ext)
         return
 
     # otherwise, save multiple filetypes
-    _saveFigFlat(fig, filename + '.png')
-    _saveFigFlat(fig, filename + '.pdf')
-    _saveFigPickled(fig, filename + '.pl')
-    # pl.dump(fig, open('figureDump/{}'.format(filename), 'wb'))
+    _saveFigFlat(fig, fullFilename_noExt + '.png')
+    _saveFigFlat(fig, fullFilename_noExt + '.pdf')
+    _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
 
 def getPullGraph(xValues, residuals):

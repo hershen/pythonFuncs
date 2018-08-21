@@ -173,7 +173,7 @@ def test_listCenters():
     assert mathFuncs.listCenters([]).size == 0
     assert mathFuncs.listCenters([1]).size == 0
     assert mathFuncs.listCenters([1, 2]) == np.array([1.5])
-    assert (mathFuncs.listCenters(np.array([1, 2, 3, 4, 5, 6])) == np.array([1.5, 2.5, 3.5, 4.5, 5.5])).all()
+    assert np.allclose(mathFuncs.listCenters(np.array([1, 2, 3, 4, 5, 6])), np.array([1.5, 2.5, 3.5, 4.5, 5.5]))
 
 
 def test_novosibirskForTf1():
@@ -189,8 +189,6 @@ def test_novosibirskForTf1():
     assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
                                                                                                                 params)).all()
     params = [10, 0.1, 0.5, -0.1]
-    print(mathFuncs.novosibirsk(x, params[1], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
-                                                                                                              params))
     assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
                                                                                                                 params)).all()
 
