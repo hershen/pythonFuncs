@@ -154,4 +154,32 @@ def test_calcPulls_fromRootObj():
     # test pulls
     np.testing.assert_array_almost_equal(pullsHist, expectedPulls)
 
-    # def test_ResidualCanvas():
+
+def test_PullCanvas():
+    # Set batch mode so canvas aren't really drawn
+    ROOT.gROOT.SetBatch(ROOT.kTRUE)
+
+    # Can't create PullCanvas with nov valid function
+    with pytest.raises(AssertionError):
+        pullCanvas = myPlotting.PullCanvas(ROOT.TCanvas(), ROOT.TGraph(), ROOT.TF1())
+
+    # Create objects to create PullCanvas
+    func = ROOT.TF1("func", "x*x", -2, 2)
+    xs = [-2, -1., 0, 1, 2]
+    ys = [5, 1, 1, 4, 3]
+    errs = [0, 1, 0.5, 0.5, 5]
+    expectedPulls = [np.inf, 0, 2, 6, -0.2]
+
+    # Create TGraphErrors
+    graph = ROOT.TGraphErrors()
+    for (i, x), y, err in zip(enumerate(xs), ys, errs):
+        graph.SetPoint(i, x, y)
+        graph.SetPointError(i, 0, err)
+
+    canvas = ROOT.TCanvas()
+    with pytest.warns(RuntimeWarning):
+        pullCanvas = myPlotting.PullCanvas(canvas, graph, func)
+
+
+    # restore batch mode
+    ROOT.gROOT.SetBatch(ROOT.kFALSE)

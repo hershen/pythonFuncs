@@ -7,7 +7,6 @@ import mathFuncs
 import root_numpy
 import matplotlib
 
-
 def getHistTops_BinEdges_FromAxes(axes):
     patch = axes.patches[0]
 
@@ -80,7 +79,7 @@ def getPullGraph(xValues, residuals):
 
     residualsGraph = ROOT.TGraph(len(xValues), xValues, residuals)
     # fill_graph(residualsGraph, re)
-    maxResidual = np.abs(residuals).max()
+    maxResidual = np.ma.masked_invalid(np.abs(residuals)).max()
     maxResidualInteger = np.ceil(maxResidual)
     residualsGraph.SetMaximum(maxResidualInteger)
     residualsGraph.SetMinimum(-maxResidualInteger)
@@ -147,9 +146,10 @@ def calcPulls_fromRootObj(rootObj, modelFunc):
     raise ValueError("{} is not supported".format(type(rootObj)))
 
 
-class ResidualCanvas:
+class PullCanvas:
+
     def __init__(self, canvas, topObject, func):
-        assert func.IsValid(), "ResidualCanvas::ResidualCanvas: function isn't valid."
+        assert func.IsValid(), "PullCanvas::PullCanvas: function isn't valid."
 
         self.canvas = canvas
         self.topObject = topObject
@@ -157,21 +157,19 @@ class ResidualCanvas:
 
         self._prepareCanvas()
 
-        residuals = calcPulls_fromRootObj(self.topObject, self.function)
+        pulls = calcPulls_fromRootObj(self.topObject, self.function)
 
-        self.residualGraph = ROOT.TGraph(getPullGraph(getXvalues(self.topObject), residuals))
+        self.pullGraph = getPullGraph(getXvalues(self.topObject), pulls)
 
-        # self.prepareObjects()
+        self._prepareObjects()
 
-    #
-    #
     def draw(self):
         self.canvas.GetPad(1).cd()
         self.topObject.Draw("AP")
         self.function.Draw("Same")
 
         self.canvas.GetPad(2).cd()
-        self.residualGraph.Draw("AP")
+        self.pullGraph.Draw("AP")
 
     def _prepareCanvas(self, bottomPadYpercentage=0.22, bottomTopSeperation=0.05):
         """
@@ -193,57 +191,52 @@ class ResidualCanvas:
         self.canvas.GetPad(2).SetGridy()
 
         self.canvas.cd()
-# #
-# #   // Prepare objects for drawing in a prettyResidualGraph
-# #   void prepareObjects() {
-# #     mtopObject.GetXaxis()->SetLabelSize(0.0); // Don't draw x labels on top object
-# #     // mtopObject.GetXaxis()->SetTitleSize(0.0); // Don't draw x title on top object
-# #
-# #     // Set axis label and Title size to absolute
-# #     mtopObject.GetYaxis()->SetLabelFont(43);     // Absolute font size in pixel (precision 3)
-# #     mresidualGraph.GetXaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
-# #     mresidualGraph.GetYaxis()->SetLabelFont(43); // Absolute font size in pixel (precision 3)
-# #     // Title
-# #     mtopObject.GetYaxis()->SetTitleFont(43);     // Absolute font size in pixel (precision 3)
-# #     mresidualGraph.GetXaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
-# #     mresidualGraph.GetYaxis()->SetTitleFont(43); // Absolute font size in pixel (precision 3)
-# #
-# #     // Set x + y axis label size
-# #     const double labelSize = std::min(0.03 * mcanvas.cd(1)->GetWh(), 0.03 * mcanvas.cd(1)->GetWw());
-# #     mtopObject.GetYaxis()->SetLabelSize(labelSize);
-# #
-# #     mresidualGraph.GetYaxis()->SetLabelSize(labelSize);
-# #     // x axis
-# #     mresidualGraph.GetXaxis()->SetLabelSize(labelSize);
-# #
-# #     // Set axis title sizes
-# #     const double titleSize = std::min(0.03 * mcanvas.cd(1)->GetWh(), 0.03 * mcanvas.cd(1)->GetWw());
-# #     mresidualGraph.GetXaxis()->SetTitleSize(titleSize);
-# #     mresidualGraph.GetYaxis()->SetTitleSize(titleSize);
-# #     mtopObject.GetYaxis()->SetTitleSize(titleSize);
-# #
-# #     // Set title offsets
-# #     mresidualGraph.GetXaxis()->SetTitleOffset(3.75);
-# #
-# #     // Set bottom x title
-# #     mresidualGraph.GetXaxis()->SetTitle(mtopObject.GetXaxis()->GetTitle());
-# #     // Set y title
-# #     mresidualGraph.GetYaxis()->SetTitle("Pull (#sigma)");
-# #
-# #     // Set residual y axis divisions
-# #     const auto maxResidual =
-# #         std::abs(*std::max_element(mresidualGraph.GetY(), mresidualGraph.GetY() + mresidualGraph.GetN() - 1,
-# #                                    [](const double residual1, const double residual2) { // find max absolute value residual
-# #                                      return std::abs(residual1) < std::abs(residual2);
-# #                                    }));
-# #     mresidualGraph.SetMaximum(std::ceil(maxResidual));
-# #     mresidualGraph.SetMinimum(-std::ceil(maxResidual));
-# #     const int maxDivisions = std::min(5., std::ceil(maxResidual));
-# #     mresidualGraph.GetYaxis()->SetNdivisions(maxDivisions, false); // false - no optimization - forces current value
-# #
-# #     // Set marker size
-# #     double markerSize = myFuncs::linearInterpolate(100, 17500, 1.2, 0.1, mresidualGraph.GetN());
-# #     // markerSize = std::min(static_cast<double>(gStyle->GetMarkerSize()), markerSize);
-# #     mresidualGraph.SetMarkerSize(markerSize);
-# #   }
-# # };
+
+    def _prepareObjects(self):
+        # Don't draw x labels on top object
+        self.topObject.GetXaxis().SetLabelSize(0.0)
+        # Don't draw x title on top object
+        self.topObject.GetXaxis().SetTitleSize(0.0)
+
+        # Set axis label and Title size to absolute
+        self.topObject.GetYaxis().SetLabelFont(43);
+        self.pullGraph.GetXaxis().SetLabelFont(43)
+        self.pullGraph.GetYaxis().SetLabelFont(43)
+        # Title
+        self.topObject.GetYaxis().SetTitleFont(43)
+        self.pullGraph.GetXaxis().SetTitleFont(43)
+        self.pullGraph.GetYaxis().SetTitleFont(43)
+
+        # Set x + y axis label size
+        print(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
+        labelSize = min(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
+        self.topObject.GetYaxis().SetLabelSize(labelSize)
+
+        self.pullGraph.GetYaxis().SetLabelSize(labelSize)
+        # x axis
+        self.pullGraph.GetXaxis().SetLabelSize(labelSize)
+
+        # Set axis title sizes
+        titleSize = min(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
+        self.pullGraph.GetXaxis().SetTitleSize(titleSize)
+        self.pullGraph.GetYaxis().SetTitleSize(titleSize)
+        self.topObject.GetYaxis().SetTitleSize(titleSize)
+
+        # Set title offsets
+        self.pullGraph.GetXaxis().SetTitleOffset(3.75)
+
+        # Set bottom x title
+        self.pullGraph.GetXaxis().SetTitle(self.topObject.GetXaxis().GetTitle())
+        # Set y title
+        self.pullGraph.GetYaxis().SetTitle("Pull (#sigma)")
+
+        # Set pull y axis divisions
+        #   maxpull = np.abs(self.pullGraph.GetY()).max()
+        # self.pullGraph.SetMaximum(np.ceil(maxpull))
+        # self.pullGraph.SetMinimum(-np.ceil(maxpull))
+        # const int maxDivisions = np.min(5., np.ceil(maxpull))
+        # self.pullGraph.GetYaxis()->SetNdivisions(maxDivisions, false); // false - no optimization - forces current value
+
+        # Set marker size
+        markerSize = np.interp(self.pullGraph.GetN(), [100, 17500], [1.2, 0.1] )
+        self.pullGraph.SetMarkerSize(markerSize)
