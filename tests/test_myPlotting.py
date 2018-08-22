@@ -180,6 +180,7 @@ def test_PullCanvas():
     with pytest.warns(RuntimeWarning):
         pullCanvas = myPlotting.PullCanvas(canvas, graph, func)
 
+    pullCanvas.draw()
 
     # restore batch mode
     ROOT.gROOT.SetBatch(ROOT.kFALSE)
