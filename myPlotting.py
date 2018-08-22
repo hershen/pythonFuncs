@@ -1,15 +1,21 @@
 #!/usr/bin/python3
 import pickle as pl
 import os
-from ROOT import TCanvas, TGraph, kFALSE, TH1
-from numpy import abs, ceil, atleast_1d, asarray
-from mathFuncs import calcPulls
-from root_numpy import evaluate, hist2array
+import ROOT
+import numpy as np
+import mathFuncs
+import root_numpy
+import matplotlib
 
 
-def getHistBinEdges_topsFromAxes(axes):
+def getHistTops_BinEdges_FromAxes(axes):
+    patch = axes.patches[0]
+
+    assert isinstance(patch, matplotlib.patches.Polygon), "Currently {} not supported. ..." \
+                                                          ". Only histograms with histtype=\'step\'".format(type(patch))
+
     # list of (x,y) coordinates of each vertex of histograms.
-    xy = axes.patches[0].get_xy()
+    xy = patch.get_xy()
 
     # Take only vertical lines (contain all information)
     data = xy[::2]
@@ -20,7 +26,7 @@ def getHistBinEdges_topsFromAxes(axes):
     # tops can disregard first entry (probably at 0)
     tops = data[1:, 1]
 
-    return binEdges, tops
+    return tops, binEdges
 
 
 def _saveFigFlat(fig, fullFilename):
@@ -66,20 +72,20 @@ def getPullGraph(xValues, residuals):
     :return:
     """
 
-    xValues = asarray(atleast_1d(xValues), dtype=float)
-    residuals = asarray(atleast_1d(residuals), dtype=float)
+    xValues = np.asarray(np.atleast_1d(xValues), dtype=float)
+    residuals = np.asarray(np.atleast_1d(residuals), dtype=float)
 
     # sanity
     assert len(xValues) == len(residuals), "xValues size {} != residuals size {}".format(len(xValues), len(residuals))
 
-    residualsGraph = TGraph(len(xValues), xValues, residuals)
+    residualsGraph = ROOT.TGraph(len(xValues), xValues, residuals)
     # fill_graph(residualsGraph, re)
-    maxResidual = abs(residuals).max()
-    maxResidualInteger = ceil(maxResidual)
+    maxResidual = np.abs(residuals).max()
+    maxResidualInteger = np.ceil(maxResidual)
     residualsGraph.SetMaximum(maxResidualInteger)
     residualsGraph.SetMinimum(-maxResidualInteger)
     residualsGraph.GetYaxis().SetNdivisions(int(maxResidualInteger),
-                                            kFALSE)  # false - no optimization - forces current value
+                                            ROOT.kFALSE)  # false - no optimization - forces current value
 
     return residualsGraph
 
@@ -93,15 +99,15 @@ def _getXvalues_TGraph(graph):
 
 
 def getXvalues(rootObj):
-    if isinstance(rootObj, TH1):
+    if isinstance(rootObj, ROOT.TH1):
         return _getXvalues_TH1(rootObj)
-    elif isinstance(rootObj, TGraph):
+    elif isinstance(rootObj, ROOT.TGraph):
         return _getXvalues_TGraph(rootObj)
 
     raise ValueError("{} is not supported".format(type(rootObj)))
 
 
-def calcPulls_graphErrors(graphErrors, modelFunc):
+def _calcPulls_graphErrors(graphErrors, modelFunc):
     """
     Calculate pulls of model function at each (x,y) value of graph
     :param graphErrors:
@@ -112,23 +118,33 @@ def calcPulls_graphErrors(graphErrors, modelFunc):
     stds = [ey for ey in graphErrors.GetEY()]
 
     xValues = getXvalues(graphErrors)
-    expectedValues = evaluate(modelFunc, xValues)
-    return calcPulls(yValues, stds, expectedValues)
+    expectedValues = root_numpy.evaluate(modelFunc, xValues)
+    return mathFuncs.calcPulls(yValues, stds, expectedValues)
 
 
-def calcPulls_TH1(hist, modelFunc):
+def _calcPulls_TH1(hist, modelFunc):
     """
     Calculate pulls of model function at hist bin centers
     :param hist:
     :param modelFunc:
     :return:
     """
-    yValues = hist2array(hist)
+    yValues = root_numpy.hist2array(hist)
     stds = [hist.GetBinError(iBin) for iBin in range(1, hist.GetNbinsX() + 1)]
 
     xValues = getXvalues(hist)
-    expectedValues = evaluate(modelFunc, xValues)
-    return calcPulls(yValues, stds, expectedValues)
+    expectedValues = root_numpy.evaluate(modelFunc, xValues)
+    return mathFuncs.calcPulls(yValues, stds, expectedValues)
+
+
+def calcPulls_fromRootObj(rootObj, modelFunc):
+    if isinstance(rootObj, ROOT.TH1):
+        return _calcPulls_TH1(rootObj, modelFunc)
+
+    elif isinstance(rootObj, ROOT.TGraphErrors):
+        return _calcPulls_graphErrors(rootObj, modelFunc)
+
+    raise ValueError("{} is not supported".format(type(rootObj)))
 
 
 class ResidualCanvas:
@@ -141,9 +157,9 @@ class ResidualCanvas:
 
         self._prepareCanvas()
 
-        residuals = calcPulls_graphErrors(self.topObject, self.function)
+        residuals = calcPulls_fromRootObj(self.topObject, self.function)
 
-        self.residualGraph = TGraph(getPullGraph(getXvalues(self.topObject), residuals));
+        self.residualGraph = ROOT.TGraph(getPullGraph(getXvalues(self.topObject), residuals))
 
         # self.prepareObjects()
 

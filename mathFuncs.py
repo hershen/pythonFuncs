@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 import numpy as np
 import math
-from scipy.special import erf
 
 _sln4 = math.sqrt(math.log(4))
 
@@ -19,7 +18,7 @@ def radial_xyz(x, y, z):
     return np.sqrt(x ** 2 + y ** 2 + z ** 2)
 
 
-def phi_xyz(x, y, z):
+def phi_xyz(x, y, _):
     """Return spherical phi coordinate from x,y,z cartezian coordinates"""
     return np.arctan2(y, x)
 
@@ -66,8 +65,8 @@ def cosHelicity(grandParent, parent, daughter):
     Taken from BAD522 v6, page 120, eq. 141
     grandparent, parent and daughter are P, Q, D in that equation
     """
-    return (lorentzDot(grandParent, daughter) * mass2(parent) - lorentzDot(grandParent, parent) * lorentzDot(parent,
-                                                                                                             daughter)) / np.sqrt(
+    return (lorentzDot(grandParent, daughter) * mass2(parent) - lorentzDot(grandParent, parent) *
+            lorentzDot(parent, daughter)) / np.sqrt(
         (lorentzDot(grandParent, parent) ** 2 - mass2(parent) * mass2(grandParent)) * (
                 lorentzDot(parent, daughter) ** 2 - mass2(parent) * mass2(daughter)))
 
@@ -146,6 +145,7 @@ def listCenters(myList):
 def gaussExp(x, norm, peak, sigma, tail):
     """
     Based on https://arxiv.org/pdf/1603.08591.pdf
+    :param x:
     :param norm: Normalization
     :param peak: Gaussian peak location
     :param sigma: Gaussian sigma
@@ -201,7 +201,7 @@ def indicesPercentageOfMax(x, percentage):
 
 def calcPulls(measuredValues, stds, expectedValues):
     """
-    Calculate pulls
+    Calculate pulls (measuredValues - expectedValues) / stds
     :param measuredValues:
     :param stds:
     :param expectedValues:

@@ -3,7 +3,6 @@ import mathFuncs
 import math
 import numpy as np
 import pytest
-from ROOT import TF1
 
 
 def test_vectorDot():
@@ -154,21 +153,6 @@ def test_novosibirsk():
                                  0.02290351914617567639]))
 
 
-def test_novosibirsk():
-    # values taken from using my c++ implementation
-    assert mathFuncs.novosibirsk(0.5, 0.5, 0.5, 1, 1) == 0.3482433775621212591
-
-    x = [0.5, 1, 2, 3]
-
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1),
-                       np.array([0.3482433775621212591, 0.2498417691242378613, 0, 0]))
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.3, 0.7, 0.1, 0.5),
-                       np.array([0.09236319105347574887, 0, 0, 0]))
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.1, 0.7, 0.9, -1),
-                       np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815,
-                                 0.02290351914617567639]))
-
-
 def test_listCenters():
     assert mathFuncs.listCenters([]).size == 0
     assert mathFuncs.listCenters([1]).size == 0
@@ -179,18 +163,18 @@ def test_listCenters():
 def test_novosibirskForTf1():
     x = [0.5]
     params = [10, 2, 0.1, 0.5]
-    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
-                                                                                                                params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.novosibirskForTf1(x, params))
 
     params = [10, 2, 1, 0.5]
-    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
-                                                                                                                params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.novosibirskForTf1(x, params))
     params = [10, 2, 4, -0.5]
-    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
-                                                                                                                params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.novosibirskForTf1(x, params))
     params = [10, 0.1, 0.5, -0.1]
-    assert (mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]) == mathFuncs.novosibirskForTf1(x,
-                                                                                                                params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.novosibirskForTf1(x, params))
 
 
 def test_gaussExp():
@@ -206,18 +190,17 @@ def test_gaussExp():
 def test_gaussExpForTf1():
     x = [0.5]
     params = [10, 2, 0.1, 0.5]
-    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
-                                                                                                          params)).all()
-
+    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.gaussExpForTf1(x, params))
     params = [10, 2, 1, 0.5]
-    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
-                                                                                                          params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.gaussExpForTf1(x, params))
     params = [10, 2, 4, -0.5]
-    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
-                                                                                                          params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.gaussExpForTf1(x, params))
     params = [10, 0.1, 0.5, -0.1]
-    assert (mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]) == mathFuncs.gaussExpForTf1(x,
-                                                                                                          params)).all()
+    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+                                         mathFuncs.gaussExpForTf1(x, params))
 
 
 def test_idicesPercentageOfMax():
@@ -255,7 +238,8 @@ def test_calcPulls():
 
 def test_cosHelicity():
     """
-    cosHelicity values calculated with c function from https://www.slac.stanford.edu/BFROOT/www/doc/workbook/analysis/analysis.html#helicity
+    cosHelicity values calculated with c function from
+    https://www.slac.stanford.edu/BFROOT/www/doc/workbook/analysis/analysis.html#helicity
     These give the negative value of my function.
     The numbers for the momentum vector components were drawn from a Gaus(0,5), and the mass from Uniform(0,5)
     """
