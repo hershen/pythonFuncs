@@ -87,6 +87,11 @@ def test_saveFig(tmpdir):
 
 
 def test_getPullGraph():
+
+    #Empty input
+    assert myPlotting.getPullGraph([], []).GetN() == 0
+
+
     x = [1, 2, 3]
     y = [4.5, 5.6, 6.5]
     graph = myPlotting.getPullGraph(x, y)

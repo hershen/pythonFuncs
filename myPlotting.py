@@ -7,6 +7,7 @@ import mathFuncs
 import root_numpy
 import matplotlib
 
+
 def getHistTops_BinEdges_FromAxes(axes):
     patch = axes.patches[0]
 
@@ -77,6 +78,9 @@ def getPullGraph(xValues, residuals):
     # sanity
     assert len(xValues) == len(residuals), "xValues size {} != residuals size {}".format(len(xValues), len(residuals))
 
+    if len(xValues) == 0:
+        return ROOT.TGraph()
+
     residualsGraph = ROOT.TGraph(len(xValues), xValues, residuals)
     # fill_graph(residualsGraph, re)
     maxResidual = np.ma.masked_invalid(np.abs(residuals)).max()
@@ -90,11 +94,11 @@ def getPullGraph(xValues, residuals):
 
 
 def _getXvalues_TH1(hist):
-    return [hist.GetBinCenter(iBin) for iBin in range(1, hist.GetNbinsX() + 1)]
+    return np.array([hist.GetBinCenter(iBin) for iBin in range(1, hist.GetNbinsX() + 1)])
 
 
 def _getXvalues_TGraph(graph):
-    return [x for x in graph.GetX()]
+    return np.array([x for x in graph.GetX()])
 
 
 def getXvalues(rootObj):
@@ -147,31 +151,67 @@ def calcPulls_fromRootObj(rootObj, modelFunc):
 
 
 class PullCanvas:
+    """
+    
+    """
 
-    def __init__(self, canvas, topObject, func):
+    def __init__(self, canvas, topObject, func, maxPull=5):
+        """
+
+        :param canvas:
+        :param topObject:
+        :param func:
+        :param maxPull:
+        """
         assert func.IsValid(), "PullCanvas::PullCanvas: function isn't valid."
-
         self.canvas = canvas
         self.topObject = topObject
         self.function = func
+        self.maxPull = maxPull
 
         self._prepareCanvas()
 
+        # Calculate pulls
         pulls = calcPulls_fromRootObj(self.topObject, self.function)
 
-        self.pullGraph = getPullGraph(getXvalues(self.topObject), pulls)
+        # Get x values of topObj
+        xValues = getXvalues(self.topObject)
 
+        # Mask of values |val| < maxPull
+        belowMaxPullMask = np.abs(pulls) < self.maxPull
+
+        # Mask xValues outside function range
+        rangeMin = ROOT.Double(0)
+        rangeMax = ROOT.Double(0)
+        self.function.GetRange(rangeMin, rangeMax)
+        xInRangeMask = np.logical_and(xValues >= rangeMin, xValues <= rangeMax)
+
+        # mask for pullGraph
+        pullGraphMask = np.logical_and(xInRangeMask, belowMaxPullMask)
+
+        # Create pull graph
+        self._pullGraph = getPullGraph(xValues[(pullGraphMask)], pulls[pullGraphMask])
+
+        # mask for pullOverflowGraph
+        pullOverflowGraphMask = np.logical_and(xInRangeMask, ~belowMaxPullMask)
+        # Create pull graph of values |val| >= maxPull
+        self._pullOverflowGraph = getPullGraph(xValues[pullOverflowGraphMask],
+                                               np.ones(pullOverflowGraphMask.sum()) * self.maxPull)
         self._prepareObjects()
 
     def draw(self):
         self.canvas.GetPad(1).cd()
-        self.topObject.Draw("AP")
+        if isinstance(self.topObject, ROOT.TH1):
+            self.topObject.Draw()
+        elif isinstance(self.topObject, ROOT.TGraph):
+            self.topObject.Draw("AP")
+
         self.function.Draw("Same")
 
         self.canvas.GetPad(2).cd()
-        self.pullGraph.Draw("AP")
+        self.pullMultiGraph.Draw("AP")
 
-    def _prepareCanvas(self, bottomPadYpercentage=0.22, bottomTopSeperation=0.05):
+    def _prepareCanvas(self, bottomPadYpercentage=0.22, bottomTopSeperation=0.025):
         """
         Prepare the top and botom canvases
         :param bottomPadYpercentage:
@@ -184,7 +224,7 @@ class PullCanvas:
         self.canvas.GetPad(1).SetBottomMargin(bottomTopSeperation)
         self.canvas.GetPad(1).SetRightMargin(0.05)
         self.canvas.GetPad(2).SetPad(0.0, 0.0, 1, bottomPadYpercentage)
-        self.canvas.GetPad(2).SetBottomMargin(0.32)
+        self.canvas.GetPad(2).SetBottomMargin(0.37)
         self.canvas.GetPad(2).SetTopMargin(0.0)
         self.canvas.GetPad(2).SetRightMargin(0.05)
         self.canvas.GetPad(2)
@@ -193,50 +233,80 @@ class PullCanvas:
         self.canvas.cd()
 
     def _prepareObjects(self):
-        # Don't draw x labels on top object
+        validOverflow = bool(self._pullOverflowGraph.GetN())
+
+        # Don't draw x labels and title on top object
         self.topObject.GetXaxis().SetLabelSize(0.0)
-        # Don't draw x title on top object
         self.topObject.GetXaxis().SetTitleSize(0.0)
+
+        # Create multiGraph
+        self.pullMultiGraph = ROOT.TMultiGraph()
+        self.pullMultiGraph.Add(self._pullGraph)
+        self.pullMultiGraph.SetMinimum(self._pullGraph.GetMinimum())
+        self.pullMultiGraph.SetMaximum(self._pullGraph.GetMaximum())
+
+        if validOverflow:
+            self.pullMultiGraph.Add(self._pullOverflowGraph)
+            self.pullMultiGraph.SetMinimum(self._pullOverflowGraph.GetMinimum())
+            self.pullMultiGraph.SetMaximum(self._pullOverflowGraph.GetMaximum())
+
+        # draw multigraph so we can GetXaxis
+        self.canvas.GetPad(2).cd()
+        self.pullMultiGraph.Draw("A")
+
+        #Set y axis divisions
+        if validOverflow:
+            self.pullMultiGraph.GetYaxis().SetNdivisions(self._pullOverflowGraph.GetYaxis().GetNdivisions(),
+                                                         ROOT.kFALSE)
+        else:
+            self.pullMultiGraph.GetYaxis().SetNdivisions(self._pullGraph.GetYaxis().GetNdivisions(), ROOT.kFALSE)
+
+        # sync top and botom xAxes ranges
+        self.pullMultiGraph.GetXaxis().SetLimits(self.topObject.GetXaxis().GetXmin(),
+                                                 self.topObject.GetXaxis().GetXmax())
 
         # Set axis label and Title size to absolute
         self.topObject.GetYaxis().SetLabelFont(43);
-        self.pullGraph.GetXaxis().SetLabelFont(43)
-        self.pullGraph.GetYaxis().SetLabelFont(43)
+        self.pullMultiGraph.GetXaxis().SetLabelFont(43)
+        self.pullMultiGraph.GetYaxis().SetLabelFont(43)
         # Title
         self.topObject.GetYaxis().SetTitleFont(43)
-        self.pullGraph.GetXaxis().SetTitleFont(43)
-        self.pullGraph.GetYaxis().SetTitleFont(43)
+        self.pullMultiGraph.GetXaxis().SetTitleFont(43)
+        self.pullMultiGraph.GetYaxis().SetTitleFont(43)
+
+        # Delete graph title
+        self.pullMultiGraph.SetTitle("")
 
         # Set x + y axis label size
-        print(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
-        labelSize = min(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
-        self.topObject.GetYaxis().SetLabelSize(labelSize)
+        textSize = min(0.04 * self.canvas.cd(1).GetWh(), 0.04 * self.canvas.cd(1).GetWw())
+        self.topObject.GetYaxis().SetLabelSize(textSize)
 
-        self.pullGraph.GetYaxis().SetLabelSize(labelSize)
+        self.pullMultiGraph.GetYaxis().SetLabelSize(textSize)
         # x axis
-        self.pullGraph.GetXaxis().SetLabelSize(labelSize)
+        self.pullMultiGraph.GetXaxis().SetLabelSize(textSize)
 
         # Set axis title sizes
-        titleSize = min(0.03 * self.canvas.cd(1).GetWh(), 0.03 * self.canvas.cd(1).GetWw())
-        self.pullGraph.GetXaxis().SetTitleSize(titleSize)
-        self.pullGraph.GetYaxis().SetTitleSize(titleSize)
-        self.topObject.GetYaxis().SetTitleSize(titleSize)
+        self.pullMultiGraph.GetXaxis().SetTitleSize(textSize)
+        self.pullMultiGraph.GetYaxis().SetTitleSize(textSize)
+        self.topObject.GetYaxis().SetTitleSize(textSize)
 
         # Set title offsets
-        self.pullGraph.GetXaxis().SetTitleOffset(3.75)
+        self.pullMultiGraph.GetXaxis().SetTitleOffset(3.75)
 
         # Set bottom x title
-        self.pullGraph.GetXaxis().SetTitle(self.topObject.GetXaxis().GetTitle())
+        self.pullMultiGraph.GetXaxis().SetTitle(self.topObject.GetXaxis().GetTitle())
         # Set y title
-        self.pullGraph.GetYaxis().SetTitle("Pull (#sigma)")
+        self.pullMultiGraph.GetYaxis().SetTitle("Pull (#sigma)")
 
-        # Set pull y axis divisions
-        #   maxpull = np.abs(self.pullGraph.GetY()).max()
-        # self.pullGraph.SetMaximum(np.ceil(maxpull))
-        # self.pullGraph.SetMinimum(-np.ceil(maxpull))
-        # const int maxDivisions = np.min(5., np.ceil(maxpull))
-        # self.pullGraph.GetYaxis()->SetNdivisions(maxDivisions, false); // false - no optimization - forces current value
+        # set marker style
+        self._pullGraph.SetMarkerStyle(ROOT.kFullCircle)
+        self._pullOverflowGraph.SetMarkerStyle(ROOT.kFullCircle)
+
+        # set marker color (like RooFit)
+        self._pullGraph.SetMarkerColor(ROOT.kBlue)
+        self._pullOverflowGraph.SetMarkerColor(ROOT.kRed)
 
         # Set marker size
-        markerSize = np.interp(self.pullGraph.GetN(), [100, 17500], [1.2, 0.1] )
-        self.pullGraph.SetMarkerSize(markerSize)
+        markerSize = np.interp(self._pullGraph.GetN(), [1, 17500], [0.8, 0.1])
+        self._pullGraph.SetMarkerSize(markerSize)
+        self._pullOverflowGraph.SetMarkerSize(markerSize)
