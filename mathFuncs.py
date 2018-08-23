@@ -144,7 +144,8 @@ def listCenters(myList):
 
 def gaussExp(x, norm, peak, sigma, tail):
     """
-    Based on https://arxiv.org/pdf/1603.08591.pdf
+    Modified version of https://arxiv.org/pdf/1603.08591.pdf, that allows both high and low tails.
+    Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussExp.cxx
     :param x:
     :param norm: Normalization
     :param peak: Gaussian peak location
@@ -152,10 +153,11 @@ def gaussExp(x, norm, peak, sigma, tail):
     :param tail: Tail parameter
     """
     x = np.asarray(x, dtype=float)
-    gausArg = (x - peak) / sigma
 
-    return np.where(gausArg >= -tail, norm * np.exp(-0.5 * gausArg ** 2),
-                    norm * np.exp(0.5 * tail ** 2 + tail * gausArg))
+    gausArg = (x - peak) / sigma if tail >= 0 else (peak - x) / sigma
+    absTail = abs(tail)
+    return np.where(gausArg >= -absTail, norm * np.exp(-0.5 * gausArg ** 2),
+                    norm * np.exp(0.5 * tail ** 2 + absTail * gausArg))
 
 
 def gaussExpForTf1(x, params):
