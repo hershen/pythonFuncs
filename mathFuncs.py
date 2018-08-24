@@ -118,24 +118,6 @@ def novosibirskForTf1(x, params):
     return novosibirsk(x[0], params[0], params[1], params[2], params[3])
 
 
-# def novosibirsk_cdf(x, norm, peak, width, tail):
-#     """Novosibirsk function
-#     See H. Ikeda et al. / Nuclear Instruments and Methods in Physics Research A 441 (2000) 401-426
-#     """
-#
-#     x = np.asarray(x, dtype=float)
-#
-#     sigmaZero = _sigmaZero(tail)
-#
-#     return np.sqrt(np.pi / 2.) * norm * width * sigmaZero / tail * erf(
-#         (sigmaZero ** 2 - np.log(1 - (x - peak) / width)) / math.sqrt(2) / sigmaZero)
-#
-#
-# def novosibirsk_norm(tail, width):
-#     sigmaZero = _sigmaZero(tail)
-#     return math.sqrt(2. / np.pi) * tail / sigmaZero / width / (erf(sigmaZero / math.sqrt(2)) - erf())
-
-
 def listCenters(myList):
     myList = np.asarray(myList)
 
@@ -150,14 +132,17 @@ def gaussExp(x, norm, peak, sigma, tail):
     :param norm: Normalization
     :param peak: Gaussian peak location
     :param sigma: Gaussian sigma
-    :param tail: Tail parameter
+    :param tail: Tail parameter. Can be any value.
+
+    Note - There is an assymetry when tail = 0.
     """
     x = np.asarray(x, dtype=float)
 
     gausArg = (x - peak) / sigma if tail >= 0 else (peak - x) / sigma
+
     absTail = abs(tail)
-    return np.where(gausArg >= -absTail, norm * np.exp(-0.5 * gausArg ** 2),
-                    norm * np.exp(0.5 * tail ** 2 + absTail * gausArg))
+    return norm * np.where(gausArg >= -absTail, np.exp(-0.5 * gausArg ** 2),
+                           np.exp(0.5 * tail ** 2 + absTail * gausArg))
 
 
 def gaussExpForTf1(x, params):
@@ -220,3 +205,121 @@ def calcPulls(measuredValues, stds, expectedValues):
         len(measuredValues), len(expectedValues))
 
     return (measuredValues - expectedValues) / stds
+
+
+def expGaussExp(x, norm, peak, sigma, tailLow, tailHigh):
+    """
+    From https://arxiv.org/pdf/1603.08591.pdf.
+    Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussDoubleSidedExp.cxx
+    :param x:
+    :param norm:
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    x = np.asarray(x, dtype=float)
+    gausArg = (x - peak) / sigma
+
+    conditions = [gausArg < -tailLow, gausArg > tailHigh, True]
+
+    return norm * np.select(conditions,
+                            [np.exp(0.5 * tailLow ** 2 + tailLow * gausArg),
+                             np.exp(0.5 * tailHigh ** 2 - tailHigh * gausArg),
+                             np.exp(-0.5 * gausArg ** 2)])
+
+
+def expGaussExpForTf1(x, params):
+    """
+    Works only for a single element array!
+    params[0]: norm
+    params[1]: peak
+    params[2]: sigma
+    params[3]: tailLow - low side tail parameter. Can't be negative.
+    params[4]: tailHigh - high side tail parameter. Can't be negative.
+    """
+
+    return expGaussExp(x[0], params[0], params[1], params[2], params[3], params[4])
+
+
+def crystallBall(x, norm, peak, sigma, alpha, n):
+    """
+    From https: // arxiv.org / pdf / 1603.08591.pdf.
+    Inspired by http: // roofit.sourceforge.net / docs / classref // src / RooCBShape.cxx.html  # RooCBShape:evaluate
+    :param x:
+    :param norm:
+    :param peak:
+    :param sigma:
+    :param alpha:
+    :param n:
+    :return:
+    """
+
+    x = np.asarray(x, dtype=float)
+
+    gausArg = (x - peak) / sigma if alpha >= 0 else (peak - x) / sigma
+
+    absAlpha = abs(alpha)
+
+    return norm * np.where(gausArg >= -absAlpha, np.exp(-0.5 * gausArg ** 2),
+                           (n / absAlpha) ** n * np.exp(-0.5 * absAlpha ** 2) / \
+                           (n / absAlpha - absAlpha - gausArg) ** n)
+
+
+def crystallBallForTf1(x, params):
+    """
+    Works only for a single element array!
+    params[0]: norm
+    params[1]: peak
+    params[2]: sigma
+    params[3]: alpha
+    params[4]: n
+    """
+
+    return expGaussExp(x[0], params[0], params[1], params[2], params[3], params[4])
+
+
+def doubleSidedCrystallBall(x, norm, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
+    """
+    From https://arxiv.org/pdf/1505.01609.pdf
+    :param x:
+    :param norm:
+    :param peak:
+    :param sigma:
+    :param alphaLow:
+    :param alphaHigh:
+    :param nLow:
+    :param nHigh:
+    :return:
+    """
+
+    x = np.asarray(x, dtype=float)
+    gausArg = (x - peak) / sigma
+
+    conditions = [gausArg <= -alphaLow, gausArg >= alphaHigh, True]
+
+    absAlphaLow = abs(alphaLow)
+    absAlphaHigh = abs(alphaHigh)
+
+    return norm * np.select(conditions,
+                            [(nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2) / (
+                                    nLow / absAlphaLow - absAlphaLow - gausArg) ** nLow,
+                             (nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2) / (
+                                     nHigh / absAlphaHigh - absAlphaHigh - gausArg) ** nHigh,
+                             np.exp(-0.5 * gausArg ** 2)])
+
+
+def doubleSidedCrystallBallForTf1(x, params):
+    """
+    Works only for a single element array!
+    :param[0] norm:
+    :param[1] peak:
+    :param[2] sigma:
+    :param[3] alphaLow:
+    :param[4] alphaHigh:
+    :param[5] nLow:
+    :param[6] nHigh:
+    """
+
+    return expGaussExp(x[0], params[0], params[1], params[2], params[3], params[4], params[5], params[6])

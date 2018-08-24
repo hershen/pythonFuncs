@@ -178,13 +178,14 @@ def test_novosibirskForTf1():
 
 
 def test_gaussExp():
-    assert mathFuncs.gaussExp(1, 10, 0, 1, 0) == 6.065306597126334236
-    assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
-    assert mathFuncs.gaussExp(1, 10, 0, 1, 1.01) == 6.065306597126334236
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.5) == 6.065306597126334236
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -2) == 10
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -5) == 18080.42414456063206903801
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -10) == 2353852668370199854.07899910749034804509
+    # assert mathFuncs.gaussExp(1, 10, 0, 1, 0) == 6.065306597126334236
+    # assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
+    # assert mathFuncs.gaussExp(1, 10, 0, 1, 1.01) == 6.065306597126334236
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -0) == 6.06530659712633423604
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.1) == 9.09372934468231420493
+    assert np.isclose(mathFuncs.gaussExp(1, 10, 0, 1, -0.5), 6.8728927879097219855)
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.7) == 6.344479679482281821
+    assert mathFuncs.gaussExp(1, 10, 0, 1, -2) == 6.06530659712633423604
 
 
 def test_gaussExpForTf1():
@@ -260,3 +261,27 @@ def test_cosHelicity():
                                             np.array([-3.794295829, -4.722211459, -0.658236281, 6.480472775]),
                                             np.array([-1.476877853, 3.277558051, -12.70315193, 13.21825152])),
                       -0.878118217)
+
+# def test_expGaussExp():
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, 0, 0) == 6.065306597126334236
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, 1.01) == 6.065306597126334236
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, -0.5) == 6.065306597126334236
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, -2) == 10
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, -5) == 18080.42414456063206903801
+#     assert mathFuncs.gaussExp(1, 10, 0, 1, -10) == 2353852668370199854.07899910749034804509
+#
+# def test_expGaussExpForTf1():
+#     x = [0.5]
+#     params = [10, 2, 0.1, 0.5]
+#     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
+#                                          mathFuncs.gaussExpForTf1(x, params))
+#     params = [10, 2, 1, 0.5]
+#     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
+#                                          mathFuncs.gaussExpForTf1(x, params))
+#     params = [10, 2, 4, -0.5]
+#     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
+#                                          mathFuncs.gaussExpForTf1(x, params))
+#     params = [10, 0.1, 0.5, -0.1]
+#     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
+#                                          mathFuncs.gaussExpForTf1(x, params))
