@@ -7,6 +7,8 @@ import mathFuncs
 import root_numpy
 import matplotlib
 
+colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kCyan, ROOT.kYellow]
+
 
 def getHistTops_BinEdges_FromAxes(axes):
     patch = axes.patches[0]
@@ -152,7 +154,7 @@ def calcPulls_fromRootObj(rootObj, modelFunc):
 
 class PullCanvas:
     """
-    
+
     """
 
     def __init__(self, canvas, topObject, func, maxPull=5):
@@ -254,7 +256,7 @@ class PullCanvas:
         self.canvas.GetPad(2).cd()
         self.pullMultiGraph.Draw("A")
 
-        #Set y axis divisions
+        # Set y axis divisions
         if validOverflow:
             self.pullMultiGraph.GetYaxis().SetNdivisions(self._pullOverflowGraph.GetYaxis().GetNdivisions(),
                                                          ROOT.kFALSE)
@@ -310,3 +312,11 @@ class PullCanvas:
         markerSize = np.interp(self._pullGraph.GetN(), [1, 17500], [0.8, 0.1])
         self._pullGraph.SetMarkerSize(markerSize)
         self._pullOverflowGraph.SetMarkerSize(markerSize)
+
+
+class Legend(ROOT.TLegend):
+    def __init__(self, x1, y1, x2, y2):
+        ROOT.TLegend.__init__(self, x1, y1, x2, y2)
+        self.SetTextFont(22)
+        self.SetFillStyle(0)  # Transpartent fill color
+        self.SetBorderSize(1)  # No shadow
