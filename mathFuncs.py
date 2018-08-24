@@ -279,7 +279,9 @@ def crystallBallForTf1(x, params):
 
 def doubleSidedCrystallBall(x, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
     """
-    From https://arxiv.org/pdf/1505.01609.pdf
+    From https://arxiv.org/pdf/1505.01609.pdf, p.5, margin.
+    That had a mistake - the sign of the gausArg in the denominatro.
+
     :param x:
     :param peak:
     :param sigma:
@@ -302,7 +304,7 @@ def doubleSidedCrystallBall(x, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
                      [(nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2) / (
                              nLow / absAlphaLow - absAlphaLow - gausArg) ** nLow,
                       (nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2) / (
-                              nHigh / absAlphaHigh - absAlphaHigh - gausArg) ** nHigh,
+                              nHigh / absAlphaHigh - absAlphaHigh + gausArg) ** nHigh,
                       np.exp(-0.5 * gausArg ** 2)])
 
 
