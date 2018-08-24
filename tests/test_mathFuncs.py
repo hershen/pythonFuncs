@@ -3,6 +3,7 @@ import mathFuncs
 import math
 import numpy as np
 import pytest
+import ROOT
 
 
 def test_vectorDot():
@@ -140,15 +141,15 @@ def test_phi_xyz():
 
 def test_novosibirsk():
     # values taken from using my c++ implementation
-    assert mathFuncs.novosibirsk(0.5, 0.5, 0.5, 1, 1) == 0.3482433775621212591
+    assert 0.5 * mathFuncs.novosibirsk(0.5, 0.5, 1, 1) == 0.3482433775621212591
 
     x = [0.5, 1, 2, 3]
 
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.5, 0.5, 1, 1),
+    assert np.allclose(0.5 * mathFuncs.novosibirsk(x, 0.5, 1, 1),
                        np.array([0.3482433775621212591, 0.2498417691242378613, 0, 0]))
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.3, 0.7, 0.1, 0.5),
+    assert np.allclose(0.3 * mathFuncs.novosibirsk(x, 0.7, 0.1, 0.5),
                        np.array([0.09236319105347574887, 0, 0, 0]))
-    assert np.allclose(mathFuncs.novosibirsk(x, 0.1, 0.7, 0.9, -1),
+    assert np.allclose(0.1 * mathFuncs.novosibirsk(x, 0.7, 0.9, -1),
                        np.array([0.0666736776538124909, 0.06577645431068489257, 0.04009622918521545815,
                                  0.02290351914617567639]))
 
@@ -163,44 +164,44 @@ def test_listCenters():
 def test_novosibirskForTf1():
     x = [0.5]
     params = [10, 2, 0.1, 0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.novosibirsk(x, params[1], params[2], params[3]),
                                          mathFuncs.novosibirskForTf1(x, params))
 
     params = [10, 2, 1, 0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.novosibirsk(x, params[1], params[2], params[3]),
                                          mathFuncs.novosibirskForTf1(x, params))
     params = [10, 2, 4, -0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.novosibirsk(x, params[1], params[2], params[3]),
                                          mathFuncs.novosibirskForTf1(x, params))
     params = [10, 0.1, 0.5, -0.1]
-    np.testing.assert_array_almost_equal(mathFuncs.novosibirsk(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.novosibirsk(x, params[1], params[2], params[3]),
                                          mathFuncs.novosibirskForTf1(x, params))
 
 
 def test_gaussExp():
-    # assert mathFuncs.gaussExp(1, 10, 0, 1, 0) == 6.065306597126334236
-    # assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
-    # assert mathFuncs.gaussExp(1, 10, 0, 1, 1.01) == 6.065306597126334236
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -0) == 6.06530659712633423604
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.1) == 9.09372934468231420493
-    assert np.isclose(mathFuncs.gaussExp(1, 10, 0, 1, -0.5), 6.8728927879097219855)
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -0.7) == 6.344479679482281821
-    assert mathFuncs.gaussExp(1, 10, 0, 1, -2) == 6.06530659712633423604
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, 0) == 6.065306597126334236
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, 0.5) == 6.065306597126334236
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, 1.01) == 6.065306597126334236
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0) == 6.06530659712633423604
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0.1) == 9.09372934468231420493
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -0.5), 6.8728927879097219855)
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0.7) == 6.344479679482281821
+    assert 10 * mathFuncs.gaussExp(1, 0, 1, -2) == 6.06530659712633423604
 
 
 def test_gaussExpForTf1():
     x = [0.5]
     params = [10, 2, 0.1, 0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.gaussExp(x, params[1], params[2], params[3]),
                                          mathFuncs.gaussExpForTf1(x, params))
     params = [10, 2, 1, 0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.gaussExp(x, params[1], params[2], params[3]),
                                          mathFuncs.gaussExpForTf1(x, params))
     params = [10, 2, 4, -0.5]
-    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.gaussExp(x, params[1], params[2], params[3]),
                                          mathFuncs.gaussExpForTf1(x, params))
     params = [10, 0.1, 0.5, -0.1]
-    np.testing.assert_array_almost_equal(mathFuncs.gaussExp(x, params[0], params[1], params[2], params[3]),
+    np.testing.assert_array_almost_equal(params[0] * mathFuncs.gaussExp(x, params[1], params[2], params[3]),
                                          mathFuncs.gaussExpForTf1(x, params))
 
 
@@ -262,6 +263,7 @@ def test_cosHelicity():
                                             np.array([-1.476877853, 3.277558051, -12.70315193, 13.21825152])),
                       -0.878118217)
 
+
 # def test_expGaussExp():
 #     assert mathFuncs.gaussExp(1, 10, 0, 1, 0, 0) == 6.065306597126334236
 #     assert mathFuncs.gaussExp(1, 10, 0, 1, 0.5) == 6.065306597126334236
@@ -285,3 +287,27 @@ def test_cosHelicity():
 #     params = [10, 0.1, 0.5, -0.1]
 #     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
 #                                          mathFuncs.gaussExpForTf1(x, params))
+
+def test_crystallBall():
+    np.random.seed(10)
+
+    for i in range(20):
+        alpha, n = np.random.uniform(-3, 3), np.random.uniform(0, 10)
+
+        if n / abs(alpha) - abs(alpha) <= 1 and not n.is_integer():
+            # argument of non integer power is complex number
+            continue
+        np.testing.assert_almost_equal(mathFuncs.crystallBall(1, 0, 1, alpha, n),
+                                       ROOT.Math.crystalball_function(1, alpha, n, 1, 0))
+
+
+def test_crystallBallForTf1():
+    np.random.seed(100)
+    x = [0.5]
+
+    for i in range(20):
+        params = [10, np.random.normal(-3, 3), np.random.uniform(0, 3), np.random.uniform(-3, 3),
+                  np.random.uniform(0, 10)]
+    np.testing.assert_array_almost_equal(
+        params[0] * mathFuncs.crystallBall(x, params[1], params[2], params[3], params[4]),
+        mathFuncs.crystallBallForTf1(x, params))
