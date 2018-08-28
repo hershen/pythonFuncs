@@ -288,15 +288,40 @@ def test_cosHelicity():
 #     np.testing.assert_array_almost_equal(mathFuncs.expGaussExp(x, params[0], params[1], params[2], params[3]),
 #                                          mathFuncs.gaussExpForTf1(x, params))
 
+def test_expGaussExp_FWHM_low_high():
+    np.random.seed(10)
+
+    for i in range(100):
+        peak = np.random.uniform(-5, 5)
+        sigma = np.random.uniform(1e-6, 3)
+        tailLow = np.random.uniform(0.1, 5)
+        tailHigh = np.random.uniform(0.1, 5)
+
+        # test FWHM low point
+        xLow = mathFuncs.expGaussExp_FWHM_xLow(peak, sigma, tailLow)
+        fwhm_y_low = mathFuncs.expGaussExp(xLow, peak, sigma, tailLow, tailHigh)
+        np.testing.assert_almost_equal(0.5 * mathFuncs.expGaussExp(peak, peak, sigma, tailLow, tailHigh), fwhm_y_low)
+
+        # test FWHM high point
+        xHigh = mathFuncs.expGaussExp_FWHM_xHigh(peak, sigma, tailHigh)
+        fwhm_y_high = mathFuncs.expGaussExp(xHigh, peak, sigma, tailLow, tailHigh)
+        np.testing.assert_almost_equal(0.5 * mathFuncs.expGaussExp(peak, peak, sigma, tailLow, tailHigh), fwhm_y_high)
+
+        # Test FWHM
+        fwhm = xHigh - xLow
+        np.testing.assert_almost_equal(fwhm, mathFuncs.expGaussExp_FWHM(peak, sigma, tailLow, tailHigh))
+
+        # Test FWHM/2.355
+        np.testing.assert_almost_equal(fwhm / 2 / mathFuncs._sln4,
+                                       mathFuncs.expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh))
+
+
 def test_crystallBall():
     np.random.seed(10)
 
     for i in range(20):
         alpha, n = np.random.uniform(-3, 3), np.random.uniform(0, 10)
 
-        if n / abs(alpha) - abs(alpha) <= 1 and not n.is_integer():
-            # argument of non integer power is complex number
-            continue
         np.testing.assert_almost_equal(mathFuncs.crystallBall(1, 0, 1, alpha, n),
                                        ROOT.Math.crystalball_function(1, alpha, n, 1, 0))
 
@@ -308,6 +333,6 @@ def test_crystallBallForTf1():
     for i in range(20):
         params = [10, np.random.normal(-3, 3), np.random.uniform(0, 3), np.random.uniform(-3, 3),
                   np.random.uniform(0, 10)]
-    np.testing.assert_array_almost_equal(
-        params[0] * mathFuncs.crystallBall(x, params[1], params[2], params[3], params[4]),
-        mathFuncs.crystallBallForTf1(x, params))
+        np.testing.assert_array_almost_equal(
+            params[0] * mathFuncs.crystallBall(x, params[1], params[2], params[3], params[4]),
+            mathFuncs.crystallBallForTf1(x, params))

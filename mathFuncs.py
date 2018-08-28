@@ -229,6 +229,52 @@ def expGaussExp(x, peak, sigma, tailLow, tailHigh):
                       np.exp(-0.5 * gausArg ** 2)])
 
 
+def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
+    """
+    Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the high side tail
+    :param peak:
+    :param sigma:
+    :param tailHigh:
+    :return:
+    """
+    return peak + sigma * _sln4 if tailHigh >= _sln4 else peak + sigma * (math.log(2) / tailHigh + 0.5 * tailHigh)
+
+
+def expGaussExp_FWHM_xLow(peak, sigma, tailLow):
+    """
+    Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the low side tail
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :return:
+    """
+    return peak - sigma * _sln4 if tailLow >= _sln4 else peak - sigma * (math.log(2) / tailLow + 0.5 * tailLow)
+
+
+def expGaussExp_FWHM(peak, sigma, tailLow, tailHigh):
+    """
+    Return FWHM of expGaussExp
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    return expGaussExp_FWHM_xHigh(peak, sigma, tailHigh) - expGaussExp_FWHM_xLow(peak, sigma, tailLow)
+
+
+def expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh):
+    """
+    Return FWHM of expGaussExp / (2 * sqrt(ln(4)) : (Gaussian equivalent of sigma)
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    return expGaussExp_FWHM(peak, sigma, tailLow, tailHigh) / 2 / _sln4
+
+
 def expGaussExpForTf1(x, params):
     """
     Works only for a single element array!
@@ -254,14 +300,18 @@ def crystallBall(x, peak, sigma, alpha, n):
     :return:
     """
 
-    x = np.asarray(x, dtype=float)
+    x = np.atleast_1d(x)
 
     gausArg = (x - peak) / sigma if alpha >= 0 else (peak - x) / sigma
 
     absAlpha = abs(alpha)
-    return np.where(gausArg >= -absAlpha, np.exp(-0.5 * gausArg ** 2),
-                    (n / absAlpha) ** n * np.exp(-0.5 * absAlpha ** 2) /
-                    (n / absAlpha - absAlpha - gausArg) ** n)
+
+    # using np.ma to prevent warning of invalid values
+
+    return np.where(gausArg >= -absAlpha,
+                    np.exp(-0.5 * gausArg ** 2),
+                    (n / absAlpha) ** n * np.exp(-0.5 * absAlpha ** 2) / np.ma.power(n / absAlpha - absAlpha - gausArg,
+                                                                                     n))
 
 
 def crystallBallForTf1(x, params):
@@ -301,10 +351,10 @@ def doubleSidedCrystallBall(x, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
     absAlphaHigh = abs(alphaHigh)
 
     return np.select(conditions,
-                     [(nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2) / (
-                             nLow / absAlphaLow - absAlphaLow - gausArg) ** nLow,
-                      (nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2) / (
-                              nHigh / absAlphaHigh - absAlphaHigh + gausArg) ** nHigh,
+                     [(nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2) / np.ma.power(
+                         nLow / absAlphaLow - absAlphaLow - gausArg, nLow),
+                      (nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2) / np.ma.power(
+                          nHigh / absAlphaHigh - absAlphaHigh + gausArg, nHigh),
                       np.exp(-0.5 * gausArg ** 2)])
 
 
@@ -320,4 +370,5 @@ def doubleSidedCrystallBallForTf1(x, params):
     param[6] nHigh
     """
 
-    return params[0] * doubleSidedCrystallBall(x[0], params[1], params[2], params[3], params[4], params[5], params[6])
+    return params[0] * doubleSidedCrystallBall(x[0], params[1], params[2], params[3], params[4], params[5],
+                                               params[6])
