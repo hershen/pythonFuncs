@@ -66,7 +66,8 @@ def saveFig(fig, filename, folder='.'):
     _saveFigFlat(fig, fullFilename_noExt + '.pdf')
     _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
-def saveCanvas(canvas, filename, ext = '', folder='.'):
+
+def saveCanvas(canvas, filename, ext='', folder='.'):
     """ Save a pyplot figure """
 
     fullDir = os.path.join(folder, 'figureDump')
@@ -156,7 +157,6 @@ def _calcPulls_TH1(hist, modelFunc):
     """
     yValues = root_numpy.hist2array(hist)
     stds = [hist.GetBinError(iBin) for iBin in range(1, hist.GetNbinsX() + 1)]
-
     xValues = getXvalues(hist)
     expectedValues = root_numpy.evaluate(modelFunc, xValues)
     return mathFuncs.calcPulls(yValues, stds, expectedValues)
@@ -215,18 +215,26 @@ class PullCanvas:
         self._pullGraph = getPullGraph(xValues[(pullGraphMask)], pulls[pullGraphMask])
 
         # mask for pullOverflowGraph
-        pullOverflowGraphMask = np.logical_and(xInRangeMask, ~belowMaxPullMask)
+        # bins with 0 entries have 0 std and therefore a pull of +-inf
+        pullOverflowGraphMask = np.logical_and.reduce((xInRangeMask, ~belowMaxPullMask, ~np.isinf(pulls)))
+
         # Create pull graph of values |val| >= maxPull
         self._pullOverflowGraph = getPullGraph(xValues[pullOverflowGraphMask],
-                                               np.ones(pullOverflowGraphMask.sum()) * self.maxPull)
+                                               np.sign(pulls[pullOverflowGraphMask]) * self.maxPull)
         self._prepareObjects()
 
-    def draw(self):
+    def draw(self, options=""):
         self.canvas.GetPad(1).cd()
         if isinstance(self.topObject, ROOT.TH1):
-            self.topObject.Draw()
+            if options:
+                self.topObject.Draw(options)
+            else:
+                self.topObject.Draw()
         elif isinstance(self.topObject, ROOT.TGraph):
-            self.topObject.Draw("AP")
+            if options:
+                self.topObject.Draw(options)
+            else:
+                self.topObject.Draw("AP")
         else:
             raise RuntimeError("Don't know how to draw object of type {}".format(type(self.topObject)))
 
@@ -243,6 +251,7 @@ class PullCanvas:
         :return:
         """
         self.canvas.cd()
+        self.canvas.Clear()
         self.canvas.Divide(1, 2)
         self.canvas.GetPad(1).SetPad(0.0, bottomPadYpercentage, 1, 1)
         self.canvas.GetPad(1).SetBottomMargin(bottomTopSeperation)
@@ -334,6 +343,12 @@ class PullCanvas:
         markerSize = np.interp(self._pullGraph.GetN(), [1, 17500], [0.8, 0.1])
         self._pullGraph.SetMarkerSize(markerSize)
         self._pullOverflowGraph.SetMarkerSize(markerSize)
+
+    def getTopPad(self):
+        return self.canvas.GetPad(1)
+
+    def getBottomPad(self):
+        return self.canvas.GetPad(2)
 
 
 class Legend(ROOT.TLegend):
