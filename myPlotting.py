@@ -6,6 +6,7 @@ import numpy as np
 import mathFuncs
 import root_numpy
 import matplotlib
+import math
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kCyan, ROOT.kYellow]
 
@@ -64,6 +65,25 @@ def saveFig(fig, filename, folder='.'):
     _saveFigFlat(fig, fullFilename_noExt + '.png')
     _saveFigFlat(fig, fullFilename_noExt + '.pdf')
     _saveFigPickled(fig, fullFilename_noExt + '.pl')
+
+def saveCanvas(canvas, filename, ext = '', folder='.'):
+    """ Save a pyplot figure """
+
+    fullDir = os.path.join(folder, 'figureDump')
+
+    # Create dir
+    if not os.path.isdir(fullDir):
+        os.mkdir(fullDir)
+
+    # If extension included, save only thatfiletype
+    fullFilename_noExt = os.path.join(fullDir, filename)
+    if ext:
+        canvas.SaveAs(fullFilename_noExt + ext)
+    else:
+        # otherwise, save multiple filetypes
+        canvas.SaveAs(fullFilename_noExt + '.png')
+        canvas.SaveAs(fullFilename_noExt + '.pdf')
+        canvas.SaveAs(fullFilename_noExt + '.root')
 
 
 def getPullGraph(xValues, residuals):
@@ -207,6 +227,8 @@ class PullCanvas:
             self.topObject.Draw()
         elif isinstance(self.topObject, ROOT.TGraph):
             self.topObject.Draw("AP")
+        else:
+            raise RuntimeError("Don't know how to draw object of type {}".format(type(self.topObject)))
 
         self.function.Draw("Same")
 
@@ -320,3 +342,18 @@ class Legend(ROOT.TLegend):
         self.SetTextFont(22)
         self.SetFillStyle(0)  # Transpartent fill color
         self.SetBorderSize(1)  # No shadow
+
+
+def setHistNominalYtitle(hist, units=''):
+    """
+    Set
+    :param hist:
+    :param units:
+    :return:
+    """
+    binWidth = hist.GetBinWidth(1)
+    title = "Entries / {}".format(binWidth)
+    if units:
+        title = title + " " + units
+
+    hist.GetYaxis().SetTitle(title)
