@@ -367,6 +367,8 @@ def setHistNominalYtitle(hist, units=''):
     :return:
     """
     binWidth = hist.GetBinWidth(1)
+    #Round binWidth to 6 + numSignificanDigits to account for floating point errors
+    binWidth = round(binWidth, -int(math.floor(math.log10(abs(binWidth)))) + 6)
     title = "Entries / {}".format(binWidth)
     if units:
         title = title + " " + units
