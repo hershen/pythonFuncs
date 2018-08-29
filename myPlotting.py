@@ -367,10 +367,32 @@ def setHistNominalYtitle(hist, units=''):
     :return:
     """
     binWidth = hist.GetBinWidth(1)
-    #Round binWidth to 6 + numSignificanDigits to account for floating point errors
+    # Round binWidth to 6 + numSignificanDigits to account for floating point errors
     binWidth = round(binWidth, -int(math.floor(math.log10(abs(binWidth)))) + 6)
     title = "Entries / {}".format(binWidth)
     if units:
         title = title + " " + units
 
     hist.GetYaxis().SetTitle(title)
+
+
+class PaveText(ROOT.TPaveText):
+    def __init__(self, x1, y1, x2, y2, options="NDCNB"):
+        ROOT.TPaveText.__init__(self, x1, y1, x2, y2, options)
+        self.SetTextFont(22)
+        self.SetFillStyle(0)  # Make fill color transparent
+        self.SetBorderSize(0)  # No border
+
+    # Constructor which puts text at the top of a histogram. Just need to set x2
+    @classmethod
+    def atTop(cls, x2, options="NDCNB"):
+        if ROOT.gPad:
+            ROOT.gPad.Update()
+            bottom = 1 - ROOT.gPad.GetTopMargin()
+            left = ROOT.gPad.GetLeftMargin()
+        else:
+            bottom = 1 - ROOT.gStyle.GetPadTopMargin()
+            left = ROOT.gStyle.GetPadLeftMargin()
+        pt = cls(left, bottom, x2, 1, options)
+        pt.SetTextAlign(12)
+        return pt
