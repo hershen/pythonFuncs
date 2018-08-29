@@ -316,17 +316,17 @@ def test_expGaussExp_FWHM_low_high():
                                        mathFuncs.expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh))
 
 
-def test_crystallBall():
+def test_crystalBall():
     np.random.seed(10)
 
     for i in range(20):
         alpha, n = np.random.uniform(-3, 3), np.random.uniform(0, 10)
 
-        np.testing.assert_almost_equal(mathFuncs.crystallBall(1, 0, 1, alpha, n),
+        np.testing.assert_almost_equal(mathFuncs.crystalBall(1, 0, 1, alpha, n),
                                        ROOT.Math.crystalball_function(1, alpha, n, 1, 0))
 
 
-def test_crystallBallForTf1():
+def test_crystalBallForTf1():
     np.random.seed(100)
     x = [0.5]
 
@@ -334,8 +334,8 @@ def test_crystallBallForTf1():
         params = [10, np.random.normal(-3, 3), np.random.uniform(0, 3), np.random.uniform(-3, 3),
                   np.random.uniform(0, 10)]
         np.testing.assert_array_almost_equal(
-            params[0] * mathFuncs.crystallBall(x, params[1], params[2], params[3], params[4]),
-            mathFuncs.crystallBallForTf1(x, params))
+            params[0] * mathFuncs.crystalBall(x, params[1], params[2], params[3], params[4]),
+            mathFuncs.crystalBallForTf1(x, params))
 
 
 def test_doubleSidedCrystalBall_FWHM_low_high():
@@ -350,24 +350,24 @@ def test_doubleSidedCrystalBall_FWHM_low_high():
         nHigh = np.random.uniform(0.1, 20)
 
         # test FWHM low point
-        xLow = mathFuncs.doubleSidedCrystallBall_FWHM_xLow(peak, sigma, tailLow, nLow)
-        fwhm_y_low = mathFuncs.doubleSidedCrystallBall(xLow, peak, sigma, tailLow, tailHigh, nLow, nHigh)
+        xLow = mathFuncs.doubleSidedcrystalBall_FWHM_xLow(peak, sigma, tailLow, nLow)
+        fwhm_y_low = mathFuncs.doubleSidedcrystalBall(xLow, peak, sigma, tailLow, tailHigh, nLow, nHigh)
         np.testing.assert_almost_equal(
-            0.5 * mathFuncs.doubleSidedCrystallBall(peak, peak, sigma, tailLow, tailHigh, nLow, nHigh), fwhm_y_low)
+            0.5 * mathFuncs.doubleSidedcrystalBall(peak, peak, sigma, tailLow, tailHigh, nLow, nHigh), fwhm_y_low)
 
         # test FWHM high point
-        xHigh = mathFuncs.doubleSidedCrystallBall_FWHM_xHigh(peak, sigma, tailHigh, nHigh)
-        fwhm_y_high = mathFuncs.doubleSidedCrystallBall(xHigh, peak, sigma, tailLow, tailHigh, nLow, nHigh)
+        xHigh = mathFuncs.doubleSidedcrystalBall_FWHM_xHigh(peak, sigma, tailHigh, nHigh)
+        fwhm_y_high = mathFuncs.doubleSidedcrystalBall(xHigh, peak, sigma, tailLow, tailHigh, nLow, nHigh)
         np.testing.assert_almost_equal(
-            0.5 * mathFuncs.doubleSidedCrystallBall(peak, peak, sigma, tailLow, tailHigh, nLow, nHigh), fwhm_y_high)
+            0.5 * mathFuncs.doubleSidedcrystalBall(peak, peak, sigma, tailLow, tailHigh, nLow, nHigh), fwhm_y_high)
 
         # Test FWHM
         fwhm = xHigh - xLow
         np.testing.assert_almost_equal(fwhm,
-                                       mathFuncs.doubleSidedCrystallBall_FWHM(peak, sigma, tailLow, tailHigh, nLow,
-                                                                              nHigh))
+                                       mathFuncs.doubleSidedcrystalBall_FWHM(peak, sigma, tailLow, tailHigh, nLow,
+                                                                             nHigh))
 
         # Test FWHM/2.355
         np.testing.assert_almost_equal(fwhm / 2 / mathFuncs._sln4,
-                                       mathFuncs.doubleSidedCrystallBall_gausEqeuivalentSigma(peak, sigma, tailLow,
-                                                                                              tailHigh, nLow, nHigh))
+                                       mathFuncs.doubleSidedCrystalBall_gausEqeuivalentSigma(peak, sigma, tailLow,
+                                                                                             tailHigh, nLow, nHigh))
