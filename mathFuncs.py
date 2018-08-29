@@ -342,7 +342,7 @@ def doubleSidedCrystallBall(x, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
     :return:
     """
 
-    x = np.asarray(x, dtype=float)
+    x = np.ma.asarray(x, dtype=float)
     gausArg = (x - peak) / sigma
 
     conditions = [gausArg <= -alphaLow, gausArg >= alphaHigh, True]
@@ -351,9 +351,9 @@ def doubleSidedCrystallBall(x, peak, sigma, alphaLow, alphaHigh, nLow, nHigh):
     absAlphaHigh = abs(alphaHigh)
 
     return np.select(conditions,
-                     [(nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2) / np.ma.power(
+                     [np.ma.asarray((nLow / absAlphaLow) ** nLow * np.exp(-0.5 * alphaLow ** 2)) / np.ma.power(
                          nLow / absAlphaLow - absAlphaLow - gausArg, nLow),
-                      (nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2) / np.ma.power(
+                      np.ma.asarray((nHigh / absAlphaHigh) ** nHigh * np.exp(-0.5 * alphaHigh ** 2)) / np.ma.power(
                           nHigh / absAlphaHigh - absAlphaHigh + gausArg, nHigh),
                       np.exp(-0.5 * gausArg ** 2)])
 
@@ -372,3 +372,57 @@ def doubleSidedCrystallBallForTf1(x, params):
 
     return params[0] * doubleSidedCrystallBall(x[0], params[1], params[2], params[3], params[4], params[5],
                                                params[6])
+
+
+def doubleSidedCrystallBall_FWHM_xHigh(peak, sigma, tailHigh, nHigh):
+    """
+    Return the x value for which doubleSidedCrystallBall(x) = 0.5*doubleSidedCrystallBall(peak), on the high side tail
+    :param peak:
+    :param sigma:
+    :param tailHigh:
+    :return:
+    """
+    absTailHigh = abs(tailHigh)
+    return peak + sigma * _sln4 if tailHigh >= _sln4 else peak + sigma * (
+            nHigh / absTailHigh * (2 * math.exp(-tailHigh ** 2 / 2)) ** (
+            1. / nHigh) + absTailHigh - nHigh / absTailHigh)
+
+
+def doubleSidedCrystallBall_FWHM_xLow(peak, sigma, tailLow, nLow):
+    """
+    Return the x value for which doubleSidedCrystallBall(x) = 0.5*doubleSidedCrystallBall(peak), on the low side tail
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :return:
+    """
+    absTailLow = abs(tailLow)
+    return peak - sigma * _sln4 if tailLow >= _sln4 else peak - sigma * (
+            nLow / absTailLow * (2 * math.exp(-tailLow ** 2 / 2)) ** (1. / nLow) + absTailLow - nLow / absTailLow)
+
+
+def doubleSidedCrystallBall_FWHM(peak, sigma, tailLow, tailHigh, nLow, nHigh):
+    """
+    Return FWHM of doubleSidedCrystallBall
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    return doubleSidedCrystallBall_FWHM_xHigh(peak, sigma, tailHigh, nHigh) - doubleSidedCrystallBall_FWHM_xLow(peak,
+                                                                                                                sigma,
+                                                                                                                tailLow,
+                                                                                                                nLow)
+
+
+def doubleSidedCrystallBall_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh, nLow, nHigh):
+    """
+    Return FWHM of doubleSidedCrystallBall / (2 * sqrt(ln(4)) : (Gaussian equivalent of sigma)
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    return doubleSidedCrystallBall_FWHM(peak, sigma, tailLow, tailHigh, nLow, nHigh) / 2 / _sln4
