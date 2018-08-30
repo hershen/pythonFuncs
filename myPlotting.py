@@ -74,7 +74,7 @@ def saveCanvas(canvas, filename, ext='', folder='.'):
 
     # Create dir
     if not os.path.isdir(fullDir):
-        os.mkdir(fullDir)
+        os.makedirs(fullDir)
 
     # If extension included, save only thatfiletype
     fullFilename_noExt = os.path.join(fullDir, filename)
@@ -396,3 +396,7 @@ class PaveText(ROOT.TPaveText):
         pt = cls(left, bottom, x2, 1, options)
         pt.SetTextAlign(12)
         return pt
+
+
+def getFitParamaeters(function):
+    return {function.GetParName(i): function.GetParameter(i) for i in range(function.GetNpar())}

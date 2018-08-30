@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import os
 import pickle as pl
 import pytest
-import root_numpy
 
 
 def test_getHistTops_BinEdges_FromAxes():
@@ -87,10 +86,8 @@ def test_saveFig(tmpdir):
 
 
 def test_getPullGraph():
-
-    #Empty input
+    # Empty input
     assert myPlotting.getPullGraph([], []).GetN() == 0
-
 
     x = [1, 2, 3]
     y = [4.5, 5.6, 6.5]
@@ -189,3 +186,13 @@ def test_PullCanvas():
 
     # restore batch mode
     ROOT.gROOT.SetBatch(ROOT.kFALSE)
+
+
+def test_getFitParameters():
+    dictionary = {'alon': 1, 'david': 1.5, 'Ewan': -0.5}
+    func = ROOT.TF1("func", "[0] + [1] + [2] + x", -1, 1, 3)
+    for i, (name, val) in enumerate(dictionary.items()):
+        func.SetParName(i, name)
+        func.SetParameter(i, val)
+
+    assert dictionary == myPlotting.getFitParamaeters(func)
