@@ -26,6 +26,9 @@ def getRun(filename):
 
 
 def loadDF(filenames, columns=None, tree="ntp1"):
+    if not filenames:
+        raise ValueError("filenames is empty")
+
     dfs = []
 
     for i, tmpDF in enumerate(uproot.iterate(filenames, tree, columns, outputtype=pd.DataFrame)):
