@@ -316,6 +316,30 @@ def test_expGaussExp_FWHM_low_high():
                                        mathFuncs.expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh))
 
 
+def test_expGaussExp_integral():
+    funcRange = [-50, 50]
+    norm = np.random.uniform(0.01, 100)
+    peak = np.random.uniform(-5, 5)
+    sigma = np.random.uniform(1e-6, 3)
+    tailLow = np.random.uniform(0.1, 5)
+    tailHigh = np.random.uniform(0.1, 5)
+    params = [norm, peak, sigma, tailLow, tailHigh]
+
+    # Gaussian only
+    # params[0] = 1
+    # params[1] = 0
+    # params[2] = 1.5
+    # params[3] = 10
+    # params[4] = 10
+
+    tf1 = ROOT.TF1("tf1", mathFuncs.expGaussExpForTf1, funcRange[0], funcRange[1], 5)
+    tf1.SetParameters(*params)
+    integral = tf1.Integral(-6, 6)
+
+    print(params)
+    np.testing.assert_almost_equal(mathFuncs.expGaussExp_integral(params, -6, 6), integral)
+
+
 def test_crystalBall():
     np.random.seed(10)
 
