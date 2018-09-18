@@ -400,3 +400,6 @@ class PaveText(ROOT.TPaveText):
 
 def getFitParamaeters(function):
     return {function.GetParName(i): function.GetParameter(i) for i in range(function.GetNpar())}
+
+def getFitParUncertainty(function):
+    return {function.GetParName(i)+ "_uncertainty": function.GetParError(i) for i in range(function.GetNpar())}
