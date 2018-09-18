@@ -317,27 +317,37 @@ def test_expGaussExp_FWHM_low_high():
 
 
 def test_expGaussExp_integral():
+    np.random.seed(10)
     funcRange = [-50, 50]
-    norm = np.random.uniform(0.01, 100)
-    peak = np.random.uniform(-5, 5)
-    sigma = np.random.uniform(1e-6, 3)
-    tailLow = np.random.uniform(0.1, 5)
-    tailHigh = np.random.uniform(0.1, 5)
-    params = [norm, peak, sigma, tailLow, tailHigh]
 
-    # Gaussian only
-    # params[0] = 1
-    # params[1] = 0
-    # params[2] = 1.5
-    # params[3] = 10
-    # params[4] = 10
+    for i in range(20):
+        while True:
+            norm = np.random.uniform(0.01, 100)
+            peak = np.random.uniform(-5, 5)
+            sigma = np.random.uniform(1e-6, 3)
+            tailLow = np.random.uniform(0.1, 5)
+            tailHigh = np.random.uniform(0.1, 5)
+            params = [norm, peak, sigma, tailLow, tailHigh]
 
-    tf1 = ROOT.TF1("tf1", mathFuncs.expGaussExpForTf1, funcRange[0], funcRange[1], 5)
-    tf1.SetParameters(*params)
-    integral = tf1.Integral(-6, 6)
+            intRange = [-5 * sigma, 5 * sigma]
 
-    print(params)
-    np.testing.assert_almost_equal(mathFuncs.expGaussExp_integral(params, -6, 6), integral)
+            #make sure integration range doesn't make exp blow up
+            if abs((intRange[0] - peak) / sigma) < 10 and abs((intRange[1] - peak) / sigma) < 10:
+                break
+        # # Gaussian only
+        # params[0] = 1
+        # params[1] = 0
+        # params[2] = 1.5
+        # params[3] = 2
+        # params[4] = 10
+
+        #Integrate using TF1.Integrate
+        tf1 = ROOT.TF1("tf1_{}".format(i), mathFuncs.expGaussExpForTf1, funcRange[0], funcRange[1], 5)
+        tf1.SetParameters(*params)
+        tf1.SetNpx(10000)
+        integral = tf1.Integral(intRange[0], intRange[1])
+
+        np.testing.assert_almost_equal(mathFuncs.expGaussExp_integral(*params, intRange[0], intRange[1]), integral)
 
 
 def test_crystalBall():
