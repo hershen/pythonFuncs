@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import numpy as np
 import math
+from scipy import stats
 
 _sln4 = math.sqrt(math.log(4))
 
@@ -286,6 +287,27 @@ def expGaussExpForTf1(x, params):
     """
 
     return params[0] * expGaussExp(x[0], params[1], params[2], params[3], params[4])
+
+
+def expGaussExp_integral(norm, peak, sigma, tailLow, tailHigh, xMin, xMax):
+    tMin = (xMin - peak) / sigma
+    tMax = (xMax - peak) / sigma
+
+    result = 0.0
+    if tMin < -tailLow:
+        result += np.exp(0.5 * tailLow ** 2) * sigma / tailLow * (
+                np.exp(min(tMax, -tailLow) * tailLow) - np.exp(tMin * tailLow))
+
+
+    if tMin < tailHigh and tMax > -tailLow:
+        result += np.sqrt(2 * np.pi) * sigma * (
+                stats.norm.cdf(min(tMax, tailHigh)) - stats.norm.cdf(max(tMin, -tailLow)))
+
+    if tMax > tailHigh:
+        result += np.exp(0.5 * tailHigh ** 2) * sigma / (-tailHigh) * (
+                np.exp(tMax * (-tailHigh)) - np.exp(max(tMin, tailHigh) * (-tailHigh)))
+
+    return norm * result
 
 
 def crystalBall(x, peak, sigma, alpha, n):
