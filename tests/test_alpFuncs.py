@@ -36,3 +36,9 @@ def test_loadDF(tmpdir):
     # Check arrays equal
     with pytest.warns(FutureWarning):
         pd.testing.assert_frame_equal(alpFuncs.loadDF(str(tempFile)), df)
+
+def test_getSignalFilenames():
+    Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7' , 'all']
+    for alpMass in range(1, 2, 10):
+        for Run in Runs:
+            assert alpFuncs.getSignalFilenames(alpMass, Run)
