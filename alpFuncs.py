@@ -92,6 +92,9 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
 
     filenames = getSignalFilenames(alpMass, Run)
 
+    if mcMatched:
+        columns.append('mcMatched')
+        
     # load files
     df = loadDF(filenames, columns=columns)
 
