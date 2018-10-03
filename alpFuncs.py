@@ -47,7 +47,7 @@ def loadDF(filenames, columns=None, tree="ntp1"):
 def getSignalFilenames(alpMass, Run):
     """
     Return list of SIGNAL filenames that match parameters
-    :param alpMass:
+    :param alpMass: float
     :param Run: Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, all
     :return: list of filenames
     """
@@ -82,7 +82,7 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
     """
     Return dataframe of SIGNAL events matching parameters
 
-    :param alpMass: string
+    :param alpMass: float
     :param Run: string. Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, all
     :param columns:
     :param triggered: bool
