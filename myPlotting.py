@@ -54,7 +54,7 @@ def saveFig(fig, filename, folder='.'):
     # If extension included, save only thatfiletype
     filename, ext = os.path.splitext(filename)
     fullFilename_noExt = os.path.join(fullDir, filename)
-    if ext and len(ext) == 3:
+    if ext and (len(ext) == 3 or len(ext) == 4):
         if ext == '.pl':
             _saveFigPickled(fig, fullFilename_noExt + ext)
         else:
