@@ -54,17 +54,19 @@ def saveFig(fig, filename, folder='.'):
     # If extension included, save only thatfiletype
     filename, ext = os.path.splitext(filename)
     fullFilename_noExt = os.path.join(fullDir, filename)
-    if ext:
+    if ext and len(ext) == 3:
         if ext == '.pl':
             _saveFigPickled(fig, fullFilename_noExt + ext)
         else:
             _saveFigFlat(fig, fullFilename_noExt + ext)
         return
-
-    # otherwise, save multiple filetypes
-    _saveFigFlat(fig, fullFilename_noExt + '.png')
-    _saveFigFlat(fig, fullFilename_noExt + '.pdf')
-    _saveFigPickled(fig, fullFilename_noExt + '.pl')
+    else:
+        # the filename has a '.' which does not seperate the extension
+        fullFilename_noExt = fullFilename_noExt + ext
+        # otherwise, save multiple filetypes
+        _saveFigFlat(fig, fullFilename_noExt + '.png')
+        _saveFigFlat(fig, fullFilename_noExt + '.pdf')
+        _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
 
 def saveCanvas(canvas, filename, ext='', folder='.'):
@@ -401,5 +403,20 @@ class PaveText(ROOT.TPaveText):
 def getFitParamaeters(function):
     return {function.GetParName(i): function.GetParameter(i) for i in range(function.GetNpar())}
 
+
 def getFitParUncertainty(function):
-    return {function.GetParName(i)+ "_uncertainty": function.GetParError(i) for i in range(function.GetNpar())}
+    return {function.GetParName(i) + "_uncertainty": function.GetParError(i) for i in range(function.GetNpar())}
+
+
+# Addopted from https://stackoverflow.com/questions/13490292/format-number-using-latex-notation-in-python
+def latex_float(x, precision=3):
+    x = float(x)
+    string = f'{x:.{precision}}' if precision else str(x)
+    if 'e' in string:
+        base, exponent = string.split('e')
+        exponent = exponent.lstrip('+0')
+        if exponent[0] == '-':
+            exponent = '-' + exponent[1:].lstrip('0')
+        return f'{base} $\\times 10^{{{exponent}}}$'
+    else:
+        return string

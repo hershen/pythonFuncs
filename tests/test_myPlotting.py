@@ -196,3 +196,17 @@ def test_getFitParameters():
         func.SetParameter(i, val)
 
     assert dictionary == myPlotting.getFitParamaeters(func)
+
+def test_latex_float():
+    assert myPlotting.latex_float(1) == '1.0'
+    assert myPlotting.latex_float(10) == '10.0'
+    assert myPlotting.latex_float(100) == '1 $\\times 10^{2}$'
+    assert myPlotting.latex_float(100.058) == '1 $\\times 10^{2}$'
+
+    assert myPlotting.latex_float(0.1) == '0.1'
+    assert myPlotting.latex_float(0.01) == '0.01'
+    assert myPlotting.latex_float(0.001) == '0.001'
+    assert myPlotting.latex_float(0.0001) == '0.0001'
+
+    assert myPlotting.latex_float(0.00001) == '1 $\\times 10^{-5}$'
+    assert myPlotting.latex_float(0.00001058) == '1.06 $\\times 10^{-5}$'
