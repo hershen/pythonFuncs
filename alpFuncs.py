@@ -104,12 +104,43 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
     filenames = getSignalFilenames(alpMass, Run, triggered)
 
     if mcMatched:
-        columns.append('mcMatched')
+        keepE1Mag = False
+        if 'e1Mag' in columns:
+            keepE1Mag = True
+        columns.extend(['mcMatched', 'e1Mag'])
 
     # load files
     df = loadDF(filenames, columns=columns)
 
     if mcMatched:
         df = df[df.mcMatched == 1]
+
+        # ----------------------------------
+        # Remove duplicate mcMatched entries - probably VERY inefficient
+        # ----------------------------------
+
+        # Get 1 entry for each event with duplicates
+        duplicateRepresentatives = df.loc[df.entryNum.shift() == df.entryNum]
+
+        # create tmp DF, so we can keep track of mass difference to alp mass
+        tmpDf = df[(df.entryNum.isin(duplicateRepresentatives.entryNum)) & (
+            df.e1Mag.isin(duplicateRepresentatives.e1Mag))].copy()
+        tmpDf['massDiff'] = (tmpDf.eta_Mass - alpMass).abs()
+
+        # Find which rows should be kept (this is done instead of finding which rows to drop because some events might
+        # have more than 2 duplicates
+        rowsToKeep = tmpDf.groupby('entryNum', sort=False).massDiff.min()
+
+        # transform to rows, because groupby loses this info
+        idxsToKeep = tmpDf[(tmpDf.entryNum.isin(rowsToKeep.index)) & (tmpDf.massDiff.isin(rowsToKeep.values))].index
+
+        # Find indices to drop
+        idxsToDrop = tmpDf.drop(idxsToKeep).index
+
+        # drop from main DF
+        df.drop(idxsToDrop, inplace=True)
+
+        if not keepE1Mag:
+            df.drop('e1Mag')
 
     return df
