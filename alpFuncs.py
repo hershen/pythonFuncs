@@ -104,10 +104,10 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
     filenames = getSignalFilenames(alpMass, Run, triggered)
 
     if mcMatched:
-        keepE1Mag = False
-        if 'e1Mag' in columns:
-            keepE1Mag = True
-        columns.extend(['mcMatched', 'e1Mag'])
+        #Add columns used for mcMatching
+        keepE1Mag = True if 'e1Mag' in columns else False
+        keepEtaMass = True if 'eta_Mass' in columns else False
+        columns.extend(['mcMatched', 'e1Mag', 'eta_Mass'])
 
     # load files
     df = loadDF(filenames, columns=columns)
@@ -141,6 +141,8 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
         df.drop(idxsToDrop, inplace=True)
 
         if not keepE1Mag:
-            df.drop('e1Mag')
-
+            df.drop('e1Mag', axis=1, inplace=True)
+        if not keepEtaMass:
+            df.drop('eta_Mass', axis=1, inplace=True)
+            
     return df
