@@ -298,7 +298,6 @@ def expGaussExp_integral(norm, peak, sigma, tailLow, tailHigh, xMin, xMax):
         result += np.exp(0.5 * tailLow ** 2) * sigma / tailLow * (
                 np.exp(min(tMax, -tailLow) * tailLow) - np.exp(tMin * tailLow))
 
-
     if tMin < tailHigh and tMax > -tailLow:
         result += np.sqrt(2 * np.pi) * sigma * (
                 stats.norm.cdf(min(tMax, tailHigh)) - stats.norm.cdf(max(tMin, -tailLow)))
@@ -448,3 +447,33 @@ def doubleSidedCrystalBall_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh, 
     :return:
     """
     return doubleSidedCrystalBall_FWHM(peak, sigma, tailLow, tailHigh, nLow, nHigh) / 2 / _sln4
+
+
+def idxFirst(data, comp, threshold, startingIdx=0):
+    """
+    Return index of first element that has relation comp to threshold. If none exists, return None.
+    :param data:
+    :param comp: Mathematical comparator. Meant to be used with operator module.
+    :param threshold:
+    :param startingLocation:
+    :return:
+    """
+    try:
+        return startingIdx + next(idx for idx, value in enumerate(data[startingIdx:]) if comp(value, threshold))
+    except StopIteration:
+        return None
+
+
+def idxFirstToLeft(data, comp, threshold, startingIdx=0):
+    """
+    Return index of first element that has relation comp to threshold, when searching to the left. If none exists, return None.
+    :param data:
+    :param comp: Mathematical comparator. Meant to be used with operator module.
+    :param threshold:
+    :param startingIdx:
+    :return:
+    """
+    reversedPosition = idxFirst(data[::-1], comp, threshold, startingIdx=len(data) - startingIdx - 1)
+    if reversedPosition == None:
+        return None
+    return len(data) - reversedPosition - 1

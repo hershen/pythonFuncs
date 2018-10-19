@@ -4,6 +4,7 @@ import math
 import numpy as np
 import pytest
 import ROOT
+import operator
 
 
 def test_vectorDot():
@@ -331,7 +332,7 @@ def test_expGaussExp_integral():
 
             intRange = [-5 * sigma, 5 * sigma]
 
-            #make sure integration range doesn't make exp blow up
+            # make sure integration range doesn't make exp blow up
             if abs((intRange[0] - peak) / sigma) < 10 and abs((intRange[1] - peak) / sigma) < 10:
                 break
         # # Gaussian only
@@ -341,7 +342,7 @@ def test_expGaussExp_integral():
         # params[3] = 2
         # params[4] = 10
 
-        #Integrate using TF1.Integrate
+        # Integrate using TF1.Integrate
         tf1 = ROOT.TF1("tf1_{}".format(i), mathFuncs.expGaussExpForTf1, funcRange[0], funcRange[1], 5)
         tf1.SetParameters(*params)
         tf1.SetNpx(10000)
@@ -405,3 +406,35 @@ def test_doubleSidedCrystalBall_FWHM_low_high():
         np.testing.assert_almost_equal(fwhm / 2 / mathFuncs._sln4,
                                        mathFuncs.doubleSidedCrystalBall_gausEqeuivalentSigma(peak, sigma, tailLow,
                                                                                              tailHigh, nLow, nHigh))
+
+
+_dataForIdxSearchingFunctions = [1, 2, 3, 4, 5, 6, 5, 4, 5, 4, 5, 3, 2, 1]
+
+
+def test_idxFirst():
+    # LT
+    assert mathFuncs.idxFirst([], operator.lt, 3) == None
+    assert mathFuncs.idxFirst([10], operator.lt, 3) == None
+    assert mathFuncs.idxFirst(_dataForIdxSearchingFunctions, operator.lt, 3) == 0
+    assert mathFuncs.idxFirst(_dataForIdxSearchingFunctions, operator.lt, 3, startingIdx=5) == 12
+
+    # GT
+    assert mathFuncs.idxFirst([], operator.gt, 3) == None
+    assert mathFuncs.idxFirst([1], operator.gt, 3) == None
+    assert mathFuncs.idxFirst(_dataForIdxSearchingFunctions, operator.gt, 3) == 3
+    assert mathFuncs.idxFirst(_dataForIdxSearchingFunctions, operator.gt, 3, startingIdx=5) == 5
+
+
+def test_idxFirstToLeft():
+    # LT
+    assert mathFuncs.idxFirstToLeft([], operator.lt, 3) == None
+    assert mathFuncs.idxFirstToLeft([10], operator.lt, 3) == None
+    assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.lt, 3, startingIdx=12) == 12
+    assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.lt, 3, startingIdx=5) == 1
+
+    # GT
+    assert mathFuncs.idxFirstToLeft([], operator.gt, 3) == None
+    assert mathFuncs.idxFirstToLeft([1], operator.gt, 3) == None
+    assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 3) == None
+    assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 6, startingIdx=5) == None
+    assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 4, startingIdx=12) == 10
