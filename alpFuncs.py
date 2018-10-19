@@ -103,14 +103,14 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
 
     filenames = getSignalFilenames(alpMass, Run, triggered)
 
+    columnsToLoad = columns.copy()
+    _extendColumns = ['mcMatched', 'entryNum', 'e1Mag', 'eta_Mass']
     if mcMatched:
-        #Add columns used for mcMatching
-        keepE1Mag = True if 'e1Mag' in columns else False
-        keepEtaMass = True if 'eta_Mass' in columns else False
-        columns.extend(['mcMatched', 'e1Mag', 'eta_Mass'])
+        #load more values, used for mcMatching
+        columnsToLoad.extend(_extendColumns)
 
     # load files
-    df = loadDF(filenames, columns=columns)
+    df = loadDF(filenames, columns=columnsToLoad)
 
     if mcMatched:
         df = df[df.mcMatched == 1]
@@ -140,9 +140,14 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
         # drop from main DF
         df.drop(idxsToDrop, inplace=True)
 
-        if not keepE1Mag:
+        #remove columns added but not requested
+        if 'e1Mag' not in columns:
             df.drop('e1Mag', axis=1, inplace=True)
-        if not keepEtaMass:
+        if 'eta_Mass' not in columns:
             df.drop('eta_Mass', axis=1, inplace=True)
-            
+        if 'mcMatched' not in columns:
+            df.drop('mcMatched', axis=1, inplace=True)
+        if 'entryNum' not in columns:
+            df.drop('entryNum', axis=1, inplace=True)
+
     return df
