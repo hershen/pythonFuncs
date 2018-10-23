@@ -38,7 +38,7 @@ def test_loadDF(tmpdir):
         pd.testing.assert_frame_equal(alpFuncs.loadDF(str(tempFile)), df)
 
 def test_getSignalFilenames():
-    Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7' , 'all']
+    Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7' , '1-7']
     for alpMass in range(1, 2, 10):
         for triggered in [True, False]:
             for Run in Runs:

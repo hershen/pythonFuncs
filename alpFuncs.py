@@ -49,7 +49,7 @@ def getSignalFilenames(alpMass, Run, triggered):
     """
     Return list of SIGNAL filenames that match parameters
     :param alpMass: float
-    :param Run: Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, all
+    :param Run: Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, 1-7
     :param triggered: give triggered filenames
     :return: list of filenames
     """
@@ -77,7 +77,7 @@ def getSignalFilenames(alpMass, Run, triggered):
     elif Run == '7':
         fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Y?S*-Ups?S*.root'
         expectedFiles = 2
-    elif Run == 'all':
+    elif Run == '1-7':
         fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*.root'
         expectedFiles = 8
 
