@@ -221,6 +221,20 @@ def test_idicesPercentageOfMax():
     with pytest.raises(ValueError):
         mathFuncs.indicesPercentageOfMax([0, 0, 0], 40)
 
+def test_valuesPercentageOfMax():
+    x = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10., 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    assert mathFuncs.valuesPercentageOfMax(x, 51) == (6, 6)
+
+    assert mathFuncs.valuesPercentageOfMax(x, 41) == (5, 5)
+    assert mathFuncs.valuesPercentageOfMax(x, 40) == (4, 4)
+    assert mathFuncs.valuesPercentageOfMax(x, 39) == (4, 4)
+
+    assert mathFuncs.valuesPercentageOfMax(x, 0) == (10, 10)
+    assert mathFuncs.valuesPercentageOfMax(x, 100) == (10, 10)
+
+    # maximum is zero - expect fail
+    with pytest.raises(ValueError):
+        mathFuncs.valuesPercentageOfMax([0, 0, 0], 40)
 
 def test_calcPulls():
     with pytest.raises(AssertionError):

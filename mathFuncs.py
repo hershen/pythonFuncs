@@ -187,6 +187,17 @@ def indicesPercentageOfMax(x, percentage):
     return lowIdx, highIdx
 
 
+def valuesPercentageOfMax(x, percentage):
+    """
+    Return last values greater than maxElement*percentage% from the left and right of maxElement - the maximum element in x
+    :param x:
+    :param percentage:
+    :return:
+    """
+    lowIdx, highIdx = indicesPercentageOfMax(x, percentage)
+    return x[lowIdx], x[highIdx]
+
+
 def calcPulls(measuredValues, stds, expectedValues):
     """
     Calculate pulls (measuredValues - expectedValues) / stds
