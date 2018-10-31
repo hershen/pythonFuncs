@@ -5,7 +5,7 @@ import numba
 import numpy as np
 from scipy import stats
 
-_sln4 = math.sqrt(math.log(4))
+_sln4 = np.sqrt(np.log(4))
 
 
 def vectorDot(v1, v2):
@@ -90,7 +90,7 @@ def effError(nom, denom):
 def _sigmaZero(tail):
     tailSln4 = tail * _sln4
 
-    return math.log(tailSln4 + math.sqrt(1.0 + tailSln4 ** 2)) / _sln4
+    return np.log(tailSln4 + np.sqrt(1.0 + tailSln4 ** 2)) / _sln4
 
 
 def novosibirsk(x, peak, width, tail):
@@ -222,7 +222,7 @@ def calcPulls(measuredValues, stds, expectedValues):
 
 
 @numba.vectorize(nopython=True)
-def expGaussExp_numba(x, peak, sigma, tailLow, tailHigh):
+def expGaussExp(x, peak, sigma, tailLow, tailHigh):
     """
     From https://arxiv.org/pdf/1603.08591.pdf.
     Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussDoubleSidedExp.cxx
@@ -241,22 +241,22 @@ def expGaussExp_numba(x, peak, sigma, tailLow, tailHigh):
         return np.exp(0.5 * tailHigh ** 2 - tailHigh * gausArg)
     else:
         return np.exp(-0.5 * gausArg ** 2)
-    
-
-def expGaussExp(x, peak, sigma, tailLow, tailHigh):
-    """
-    From https://arxiv.org/pdf/1603.08591.pdf.
-    Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussDoubleSidedExp.cxx
-    :param x:
-    :param peak:
-    :param sigma:
-    :param tailLow:
-    :param tailHigh:
-    :return:
-    """
-    return expGaussExp_numba(np.asarray(x, dtype=float), peak, sigma, tailLow, tailHigh)
 
 
+# def expGaussExp(x, peak, sigma, tailLow, tailHigh):
+#     """
+#     From https://arxiv.org/pdf/1603.08591.pdf.
+#     Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussDoubleSidedExp.cxx
+#     :param x:
+#     :param peak:
+#     :param sigma:
+#     :param tailLow:
+#     :param tailHigh:
+#     :return:
+#     """
+#     return expGaussExp_numba(np.asarray(x, dtype=float), peak, sigma, tailLow, tailHigh)
+
+@numba.vectorize(nopython=True)
 def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
     """
     Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the high side tail
@@ -265,9 +265,10 @@ def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
     :param tailHigh:
     :return:
     """
-    return peak + sigma * _sln4 if tailHigh >= _sln4 else peak + sigma * (math.log(2) / tailHigh + 0.5 * tailHigh)
+    return peak + sigma * _sln4 if tailHigh >= _sln4 else peak + sigma * (np.log(2) / tailHigh + 0.5 * tailHigh)
 
 
+@numba.vectorize(nopython=True)
 def expGaussExp_FWHM_xLow(peak, sigma, tailLow):
     """
     Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the low side tail
@@ -276,9 +277,10 @@ def expGaussExp_FWHM_xLow(peak, sigma, tailLow):
     :param tailLow:
     :return:
     """
-    return peak - sigma * _sln4 if tailLow >= _sln4 else peak - sigma * (math.log(2) / tailLow + 0.5 * tailLow)
+    return peak - sigma * _sln4 if tailLow >= _sln4 else peak - sigma * (np.log(2) / tailLow + 0.5 * tailLow)
 
 
+@numba.vectorize(nopython=True)
 def expGaussExp_FWHM(peak, sigma, tailLow, tailHigh):
     """
     Return FWHM of expGaussExp
@@ -291,6 +293,7 @@ def expGaussExp_FWHM(peak, sigma, tailLow, tailHigh):
     return expGaussExp_FWHM_xHigh(peak, sigma, tailHigh) - expGaussExp_FWHM_xLow(peak, sigma, tailLow)
 
 
+@numba.vectorize(nopython=True)
 def expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh):
     """
     Return FWHM of expGaussExp / (2 * sqrt(ln(4)) : (Gaussian equivalent of sigma)
