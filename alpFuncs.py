@@ -5,6 +5,13 @@ import pandas as pd
 import glob
 import os
 
+SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436,
+                    'Y2S_OnPeak':  0.426,
+                    'Y3S_OffPeak': 0.292,
+                    'Y3S_OnPeak':  0.374,
+                    'Y4S_OffPeak': 5.857,
+                    'Y4S_OnPeak':  5.62}
+
 
 def getMass(filename):
     """Return mass from the filename"""
@@ -27,20 +34,37 @@ def getRun(filename):
     return filename[preRunLoc:postRunLoc]
 
 
-def loadDF(filenames, columns=None, tree="ntp1"):
+def loadDF(filenames, columns=None, tree="ntp1", preselection=None):
+    """
+
+    :param filenames:
+    :param columns:
+    :param tree:
+    :param preselection: Function that Determines which rows to keep.
+                         The function receives the loaded dataframe and
+                         returns a list of True or False.
+                         Example: def cutEtaMass(df):
+                                    return (df.eta_Mass > 1.5) & (df.eta_Mass < 3)
+    :return:
+    """
     if not filenames:
         raise ValueError("filenames is empty")
 
     dfs = []
 
-    for tmpDF in uproot.iterate(filenames, tree, columns, outputtype=pd.DataFrame):
-        dfs.append(tmpDF)
+    for tmpDf in uproot.iterate(filenames, tree, columns, outputtype=pd.DataFrame, namedecode="utf-8"):
+
+        # preselect
+        if preselection:
+            tmpDf = tmpDf[preselection(tmpDf)]
+
+        dfs.append(tmpDf)
 
     # Concat at end
     df = pd.concat(dfs)
 
     # change column names to strings
-    df.columns = df.columns.astype(str)
+    # df.columns = df.columns.astype(str)
 
     return df
 
@@ -89,7 +113,7 @@ def getSignalFilenames(alpMass, Run, triggered):
     return filenames
 
 
-def getSignalData(alpMass, Run, columns, triggered, mcMatched):
+def getSignalData(alpMass, Run, columns, triggered, mcMatched, preselection=None):
     """
     Return dataframe of SIGNAL events matching parameters
 
@@ -106,11 +130,11 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
     columnsToLoad = columns.copy()
     _extendColumns = ['mcMatched', 'entryNum', 'e1Mag', 'eta_Mass']
     if mcMatched:
-        #load more values, used for mcMatching
+        # load more values, used for mcMatching
         columnsToLoad.extend(_extendColumns)
 
     # load files
-    df = loadDF(filenames, columns=columnsToLoad)
+    df = loadDF(filenames, columns=columnsToLoad, preselection=preselection)
 
     if mcMatched:
         df = df[df.mcMatched == 1]
@@ -140,7 +164,7 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched):
         # drop from main DF
         df.drop(idxsToDrop, inplace=True)
 
-        #remove columns added but not requested
+        # remove columns added but not requested
         if 'e1Mag' not in columns:
             df.drop('e1Mag', axis=1, inplace=True)
         if 'eta_Mass' not in columns:
