@@ -1,6 +1,8 @@
 #!/usr/bin/python3
-import numpy as np
 import math
+
+import numba
+import numpy as np
 from scipy import stats
 
 _sln4 = math.sqrt(math.log(4))
@@ -219,6 +221,28 @@ def calcPulls(measuredValues, stds, expectedValues):
     return (measuredValues - expectedValues) / stds
 
 
+@numba.vectorize(nopython=True)
+def expGaussExp_numba(x, peak, sigma, tailLow, tailHigh):
+    """
+    From https://arxiv.org/pdf/1603.08591.pdf.
+    Inspired by https://github.com/souvik1982/GaussExp/blob/master/RooFitImplementation/RooGaussDoubleSidedExp.cxx
+    :param x:
+    :param peak:
+    :param sigma:
+    :param tailLow:
+    :param tailHigh:
+    :return:
+    """
+    gausArg = (x - peak) / sigma
+
+    if gausArg < -tailLow:
+        return np.exp(0.5 * tailLow ** 2 + tailLow * gausArg)
+    elif gausArg > tailHigh:
+        return np.exp(0.5 * tailHigh ** 2 - tailHigh * gausArg)
+    else:
+        return np.exp(-0.5 * gausArg ** 2)
+    
+
 def expGaussExp(x, peak, sigma, tailLow, tailHigh):
     """
     From https://arxiv.org/pdf/1603.08591.pdf.
@@ -230,15 +254,7 @@ def expGaussExp(x, peak, sigma, tailLow, tailHigh):
     :param tailHigh:
     :return:
     """
-    x = np.asarray(x, dtype=float)
-    gausArg = (x - peak) / sigma
-
-    conditions = [gausArg < -tailLow, gausArg > tailHigh, True]
-
-    return np.select(conditions,
-                     [np.exp(0.5 * tailLow ** 2 + tailLow * gausArg),
-                      np.exp(0.5 * tailHigh ** 2 - tailHigh * gausArg),
-                      np.exp(-0.5 * gausArg ** 2)])
+    return expGaussExp_numba(np.asarray(x, dtype=float), peak, sigma, tailLow, tailHigh)
 
 
 def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
