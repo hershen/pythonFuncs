@@ -6,11 +6,11 @@ import glob
 import os
 
 SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436,
-                    'Y2S_OnPeak':  0.426,
+                    'Y2S_OnPeak': 0.426,
                     'Y3S_OffPeak': 0.292,
-                    'Y3S_OnPeak':  0.374,
+                    'Y3S_OnPeak': 0.374,
                     'Y4S_OffPeak': 5.857,
-                    'Y4S_OnPeak':  5.62}
+                    'Y4S_OnPeak': 5.62}
 
 
 def getMass(filename):
@@ -175,3 +175,13 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched, preselection=None
             df.drop('entryNum', axis=1, inplace=True)
 
     return df
+
+
+def getDatasets(Runs):
+    if Runs == '1-6':
+        return ['Y4S_OffPeak', 'Y4S_OnPeak']
+    if Runs == '7':
+        return ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak']
+    if Runs == '1-7':
+        return ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak', 'Y4S_OffPeak', 'Y4S_OnPeak']
+    raise ValueError(f'Unkown Run {Runs}')

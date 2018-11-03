@@ -43,3 +43,9 @@ def test_getSignalFilenames():
         for triggered in [True, False]:
             for Run in Runs:
                 assert alpFuncs.getSignalFilenames(alpMass, Run, triggered)
+
+def test_getDatasets():
+    assert alpFuncs.getDatasets('1-6') == ['Y4S_OffPeak', 'Y4S_OnPeak']
+    assert alpFuncs.getDatasets('7') == ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak']
+    assert alpFuncs.getDatasets('1-7') == ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak', 'Y4S_OffPeak',
+                                           'Y4S_OnPeak']
