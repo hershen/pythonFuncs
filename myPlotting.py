@@ -69,10 +69,17 @@ def saveFig(fig, filename, folder='.'):
         _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
 
-def saveCanvas(canvas, filename, ext='', folder='.'):
-    """ Save a pyplot figure """
+def saveCanvas(canvas, filename, ext='', folder=''):
+    """
+    Save a Root canvas
+    :param canvas:
+    :param filename:
+    :param ext:
+    :param folder: folder inside figureDump to save the figures.
+    :return:
+    """
 
-    fullDir = os.path.join(folder, 'figureDump')
+    fullDir = os.path.join('figureDump', folder)
 
     # Create dir
     if not os.path.isdir(fullDir):
@@ -371,6 +378,9 @@ def setHistNominalYtitle(hist, units=''):
     binWidth = hist.GetBinWidth(1)
     # Round binWidth to 6 + numSignificanDigits to account for floating point errors
     binWidth = round(binWidth, -int(math.floor(math.log10(abs(binWidth)))) + 6)
+    if binWidth.is_integer():
+        binWidth = int(binWidth)
+
     title = "Entries / {}".format(binWidth)
     if units:
         title = title + " " + units
