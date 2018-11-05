@@ -509,11 +509,15 @@ def idxFirstToLeft(data, comp, threshold, startingIdx=0):
     return len(data) - reversedPosition - 1
 
 
-@njit
-def expGausExp_pol2_numba(x, params0, params1, params2, params3, params4, params5, params6, params7):
-    return params5 + params6 * x + params7 * x * x + params0 * expGaussExp(x, params1, params2, params3, params4)
+@njit()
+def poly_numba(x, params):
+    sum = 0
+    for n, p in enumerate(params):
+        sum += p * (x ** n)
+
+    return sum
 
 
-def expGausExp_pol2(x, params):
-    return expGausExp_pol2_numba(x[0], params[0], params[1], params[2], params[3], params[4], params[5], params[6],
-                                 params[7])
+def expGausExp_poln(x, params):
+    polyParams = [params[i] for i in range(5, len(params))]
+    return params[0] * expGaussExp(x[0], params[1], params[2], params[3], params[4]) + poly_numba(x[0], polyParams)
