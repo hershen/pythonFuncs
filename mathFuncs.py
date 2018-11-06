@@ -256,7 +256,7 @@ def expGaussExp(x, peak, sigma, tailLow, tailHigh):
 #     """
 #     return expGaussExp_numba(np.asarray(x, dtype=float), peak, sigma, tailLow, tailHigh)
 
-@njit
+@vectorize
 def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
     """
     Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the high side tail
@@ -268,7 +268,7 @@ def expGaussExp_FWHM_xHigh(peak, sigma, tailHigh):
     return peak + sigma * _sln4 if tailHigh >= _sln4 else peak + sigma * (np.log(2) / tailHigh + 0.5 * tailHigh)
 
 
-@njit
+@vectorize
 def expGaussExp_FWHM_xLow(peak, sigma, tailLow):
     """
     Return the x value for which expGaussExp(x) = 0.5*expGaussExp(peak), on the low side tail
@@ -280,7 +280,7 @@ def expGaussExp_FWHM_xLow(peak, sigma, tailLow):
     return peak - sigma * _sln4 if tailLow >= _sln4 else peak - sigma * (np.log(2) / tailLow + 0.5 * tailLow)
 
 
-@njit
+@vectorize
 def expGaussExp_FWHM(peak, sigma, tailLow, tailHigh):
     """
     Return FWHM of expGaussExp
@@ -293,7 +293,7 @@ def expGaussExp_FWHM(peak, sigma, tailLow, tailHigh):
     return expGaussExp_FWHM_xHigh(peak, sigma, tailHigh) - expGaussExp_FWHM_xLow(peak, sigma, tailLow)
 
 
-@njit
+@vectorize
 def expGaussExp_gausEqeuivalentSigma(peak, sigma, tailLow, tailHigh):
     """
     Return FWHM of expGaussExp / (2 * sqrt(ln(4)) : (Gaussian equivalent of sigma)
@@ -521,3 +521,14 @@ def poly_numba(x, params):
 def expGausExp_poln(x, params):
     polyParams = [params[i] for i in range(5, len(params))]
     return params[0] * expGaussExp(x[0], params[1], params[2], params[3], params[4]) + poly_numba(x[0], polyParams)
+
+
+def myround(x, base=5):
+    """
+    Inspired by
+    https://stackoverflow.com/questions/2272149/round-to-5-or-other-number-in-python
+    :param x:
+    :param base:
+    :return:
+    """
+    return base * round(float(x) / base)
