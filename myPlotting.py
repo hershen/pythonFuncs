@@ -267,7 +267,7 @@ class PullCanvas:
         self.canvas.GetPad(1).SetRightMargin(0.05)
         self.canvas.GetPad(2).SetPad(0.0, 0.0, 1, bottomPadYpercentage)
         self.canvas.GetPad(2).SetBottomMargin(0.37)
-        self.canvas.GetPad(2).SetTopMargin(0.0)
+        self.canvas.GetPad(2).SetTopMargin(bottomTopSeperation * 2.5)
         self.canvas.GetPad(2).SetRightMargin(0.05)
         self.canvas.GetPad(2)
         self.canvas.GetPad(2).SetGridy()
@@ -333,7 +333,12 @@ class PullCanvas:
         self.topObject.GetYaxis().SetTitleSize(textSize)
 
         # Set title offsets
-        self.pullMultiGraph.GetXaxis().SetTitleOffset(3.75)
+        self.pullMultiGraph.GetXaxis().SetTitleOffset(4)
+        self.topObject.GetYaxis().SetTitleOffset(self.topObject.GetYaxis().GetTitleOffset() * 1.1)
+        self.pullMultiGraph.GetYaxis().SetTitleOffset(self.topObject.GetYaxis().GetTitleOffset())
+
+        # x axis tick label offset (so there's no collision at bottom left corner
+        self.pullMultiGraph.GetXaxis().SetLabelOffset(self.pullMultiGraph.GetXaxis().GetLabelOffset() + 0.03)
 
         # Set bottom x title
         self.pullMultiGraph.GetXaxis().SetTitle(self.topObject.GetXaxis().GetTitle())
