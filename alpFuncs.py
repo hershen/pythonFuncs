@@ -185,3 +185,8 @@ def getDatasets(Runs):
     if Runs == '1-7':
         return ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak', 'Y4S_OffPeak', 'Y4S_OnPeak']
     raise ValueError(f'Unkown Run {Runs}')
+
+
+def getTriggered(df):
+    return (df.DigiFGammaGamma == 1) | (df.DigiFSingleGamma == 1) | \
+           (((df.L3OutDch == 1) | (df.L3OutEmc == 1)) & (df.BGFSingleGammaInvisible == 1))
