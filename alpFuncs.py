@@ -127,7 +127,12 @@ def getSignalData(alpMass, Run, columns, triggered, mcMatched, preselection=None
 
     filenames = getSignalFilenames(alpMass, Run, triggered)
 
-    columnsToLoad = columns.copy()
+    try:
+        columnsToLoad = columns.copy()
+    except AttributeError:  # If columns is none
+        columns = uproot.open(filenames[0])['ntp1'].keys()
+        columnsToLoad = columns
+
     _extendColumns = ['mcMatched', 'entryNum', 'e1Mag', 'eta_Mass']
     if mcMatched:
         # load more values, used for mcMatching
