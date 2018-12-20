@@ -42,14 +42,14 @@ def _saveFigPickled(fig, fullFilename):
     pl.dump(fig, open('{}'.format(fullFilename), 'wb'))
 
 
-def saveFig(fig, filename, folder='.'):
+def saveFig(fig, filename, folder='.', subFolder=''):
     """ Save a pyplot figure """
 
-    fullDir = os.path.join(folder, 'figureDump')
+    fullDir = os.path.join(folder, 'figureDump', subFolder)
 
     # Create dir
     if not os.path.isdir(fullDir):
-        os.mkdir(fullDir)
+        os.makedirs(fullDir)
 
     # If extension included, save only thatfiletype
     filename, ext = os.path.splitext(filename)
