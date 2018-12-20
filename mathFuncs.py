@@ -523,12 +523,13 @@ def expGausExp_poln(x, params):
     return params[0] * expGaussExp(x[0], params[1], params[2], params[3], params[4]) + poly_numba(x[0], polyParams)
 
 
-def myround(x, base=5):
+def myround(x, base=5, func=round):
     """
     Inspired by
     https://stackoverflow.com/questions/2272149/round-to-5-or-other-number-in-python
     :param x:
     :param base:
+    :param func: function to use for rounding (i.e. round, math.floor, etc.)
     :return:
     """
-    return base * round(float(x) / base)
+    return base * func(float(x) / base)
