@@ -78,6 +78,9 @@ def getSignalFilenames(alpMass, Run, triggered):
     :return: list of filenames
     """
 
+    if triggered:
+        raise DeprecationWarning("triggered not supported anymore")
+
     baseFolder = '/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig/flatNtuples'
     baseFilename = 'flat'
     if triggered:

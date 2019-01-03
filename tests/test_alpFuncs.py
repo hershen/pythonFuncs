@@ -40,9 +40,8 @@ def test_loadDF(tmpdir):
 def test_getSignalFilenames():
     Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7' , '1-7']
     for alpMass in range(1, 2, 10):
-        for triggered in [True, False]:
-            for Run in Runs:
-                assert alpFuncs.getSignalFilenames(alpMass, Run, triggered)
+        for Run in Runs:
+            assert alpFuncs.getSignalFilenames(alpMass, Run, triggered=False)
 
 def test_getDatasets():
     assert alpFuncs.getDatasets('1-6') == ['Y4S_OffPeak', 'Y4S_OnPeak']
