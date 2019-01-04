@@ -435,3 +435,23 @@ def latex_float(x, precision=3):
         return f'{base} $\\times 10^{{{exponent}}}$'
     else:
         return string
+
+
+def weightsForSameArea(otherTops, otherBins, array, range=None):
+    """
+
+    :param otherTops: top of bins of histogram that we're comparing to
+    :param otherBins: bin boundaries of histogram that we're comparing to
+    :param array: The array we're going to histogram
+    :param range: Optional range of the histogram - we don't want entries oustside this range to change our weights
+    :return: weights to use for histograming
+    """
+    binWidth = otherBins[1] - otherBins[0]
+    otherArea = sum(otherTops) * binWidth
+
+    if range:
+        numEntriesInRange = ((array >= range[0]) & (array <= range[1])).sum()
+    else:
+        numEntriesInRange = len(array)
+
+    return [otherArea / numEntriesInRange / binWidth] * len(array)
