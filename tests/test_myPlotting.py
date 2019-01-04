@@ -197,6 +197,7 @@ def test_getFitParameters():
 
     assert dictionary == myPlotting.getFitParamaeters(func)
 
+
 def test_latex_float():
     assert myPlotting.latex_float(1) == '1.0'
     assert myPlotting.latex_float(10) == '10.0'
@@ -210,3 +211,21 @@ def test_latex_float():
 
     assert myPlotting.latex_float(0.00001) == '1 $\\times 10^{-5}$'
     assert myPlotting.latex_float(0.00001058) == '1.06 $\\times 10^{-5}$'
+
+
+def test_weightsForSameArea():
+    for i in range(1, 5):
+        tops = np.random.poisson(10, size=100)
+        bins = np.arange(0, len(tops))
+        binwidth = bins[1] - bins[0]
+
+        # within bin range
+        array = np.random.normal(loc=len(tops) / 2, scale=0.1, size=400)
+        expectedWeights = [sum(tops) * binwidth / len(array)] * len(array)
+        assert np.allclose(expectedWeights, myPlotting.weightsForSameArea(tops, bins, array))
+
+        # entries outside bin range
+        array = np.random.normal(loc=len(tops) / 2, scale=100, size=400)
+        entriesInRange = ((array > bins[0]) & (array < len(tops) - 1)).sum()
+        expectedWeights = [sum(tops) * binwidth / entriesInRange] * len(array)
+        assert np.allclose(expectedWeights, myPlotting.weightsForSameArea(tops, bins, array, range=[0, len(tops) - 1]))
