@@ -32,9 +32,9 @@ def getHistTops_BinEdges_FromAxes(axes):
     return tops, binEdges
 
 
-def _saveFigFlat(fig, fullFilename):
+def _saveFigFlat(fig, fullFilename, **kwargs):
     """ filename should contain extension"""
-    fig.savefig('{}'.format(fullFilename), dpi=300)
+    fig.savefig('{}'.format(fullFilename), dpi=300, **kwargs)
 
 
 def _saveFigPickled(fig, fullFilename):
@@ -42,7 +42,7 @@ def _saveFigPickled(fig, fullFilename):
     pl.dump(fig, open('{}'.format(fullFilename), 'wb'))
 
 
-def saveFig(fig, filename, folder='.', subFolder=''):
+def saveFig(fig, filename, folder='.', subFolder='', **kwargs):
     """ Save a pyplot figure """
 
     fullDir = os.path.join(folder, 'figureDump', subFolder)
@@ -58,7 +58,7 @@ def saveFig(fig, filename, folder='.', subFolder=''):
         if ext == '.pl':
             _saveFigPickled(fig, fullFilename_noExt + ext)
         else:
-            _saveFigFlat(fig, fullFilename_noExt + ext)
+            _saveFigFlat(fig, fullFilename_noExt + ext, **kwargs)
         return
     else:
         # the filename has a '.' which does not seperate the extension
