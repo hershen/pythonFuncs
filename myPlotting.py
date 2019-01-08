@@ -455,3 +455,22 @@ def weightsForSameArea(otherTops, otherBins, array, range=None):
         numEntriesInRange = len(array)
 
     return [otherArea / numEntriesInRange / binWidth] * len(array)
+
+
+def getOptimalRange(lowEdge, highEdge, nBins, binWidths):
+    oldRange = highEdge - lowEdge
+
+    if oldRange <= 0:
+        raise ValueError(f'range of [{lowEdge}, {highEdge}] is negative')
+    oldBinWidth = oldRange / nBins
+
+    try:
+        newBinWidth = binWidths[np.searchsorted(binWidths, oldBinWidth)]
+    except IndexError:
+        raise ValueError(
+            f'Provided bin width {oldBinWidth} outside bin width range provided [{binWidths[0]}, {binWidths[-1]}]')
+        return [lowEdge, highEdge]
+
+    newRange = newBinWidth * nBins
+    deltaRange = newRange - oldRange
+    return [lowEdge - deltaRange / 2, highEdge + deltaRange / 2]
