@@ -469,7 +469,6 @@ def getOptimalRange(lowEdge, highEdge, nBins, binWidths):
     except IndexError:
         raise ValueError(
             f'Provided bin width {oldBinWidth} outside bin width range provided [{binWidths[0]}, {binWidths[-1]}]')
-        return [lowEdge, highEdge]
 
     newRange = newBinWidth * nBins
     deltaRange = newRange - oldRange
