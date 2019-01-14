@@ -5,12 +5,12 @@ import pandas as pd
 import glob
 import os
 
-SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436,
-                    'Y2S_OnPeak': 0.426,
-                    'Y3S_OffPeak': 0.292,
-                    'Y3S_OnPeak': 0.374,
-                    'Y4S_OffPeak': 5.857,
-                    'Y4S_OnPeak': 5.62}
+SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436278194778745,
+                    'Y2S_OnPeak': 0.426093591118402,
+                    'Y3S_OffPeak': 0.29208690815739,
+                    'Y3S_OnPeak': 0.374345675403956,
+                    'Y4S_OffPeak': 5.85653901412377,
+                    'Y4S_OnPeak': 5.61997987743639}
 
 
 def getMass(filename):
