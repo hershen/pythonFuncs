@@ -5,6 +5,7 @@ from uncertainties import umath, unumpy
 
 import generalFuncs
 import mathFuncs
+import alpFuncs
 
 
 def addMinEcm(df):
@@ -63,15 +64,28 @@ def addExtraColumns(df):
         func(df)
 
 
-def loadDfsFromHdf(filename):
+def getScaleFactorToTotalLumi(sample, scaleFor):
+    if isinstance(scaleFor, int) or isinstance(scaleFor, float):
+        return scaleFor
+    elif scaleFor == 'data':
+        return 20  # 1/0.05
+    elif scaleFor == 'SP1074':
+        return alpFuncs.SCALE_MC_TO_DATA[sample.replace('Run', 'Y').lstrip('/')]
+    else:
+        raise ValueError(f'{scaleFor} not supported yet')
+
+
+def loadDfsFromHdf(filename, scaleFor):
     dfs = {}
     allGroups = generalFuncs.getHdfGroups(filename)
-    groups1_6 = [group for group in allGroups if int(
-        group[4]) in np.arange(1, 7) and 'S' not in group]
+
+    groups1_6 = [group for group in allGroups if
+                 int(group[4]) in np.arange(1, 7) and ('S' not in group or '4' in group)]
     dfs1_6 = []
     for group in groups1_6:
         df = pd.read_hdf(filename, group)
         addExtraColumns(df)
+        df['scaleforTotalLumi'] = getScaleFactorToTotalLumi(group, scaleFor)
         dfs1_6.append(df)
     dfs['1-6'] = pd.concat(dfs1_6)
 
@@ -81,6 +95,7 @@ def loadDfsFromHdf(filename):
     for group in groups7:
         df = pd.read_hdf(filename, group)
         addExtraColumns(df)
+        df['scaleforTotalLumi'] = getScaleFactorToTotalLumi(group, scaleFor)
         dfs7.append(df)
     dfs['7'] = pd.concat(dfs7)
     return dfs
@@ -108,7 +123,7 @@ def dictToFilter(df, **args):
 
 
 def count(df, **args):
-    return dictToFilter(df, **args).sum()
+    return df[dictToFilter(df, **args)].scaleforTotalLumi.sum()
 
 
 def calcSensitivity(S, B, punziFactor):
