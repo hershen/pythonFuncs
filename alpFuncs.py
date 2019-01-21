@@ -107,6 +107,8 @@ def getSignalFilenames(alpMass, Run, triggered):
     elif Run == '1-7':
         fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*.root'
         expectedFiles = 8
+    else:
+        raise ValueError(f'Run {Run} not recognized')
 
     filenames = glob.glob(fileTemplate)
 
