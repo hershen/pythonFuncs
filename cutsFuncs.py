@@ -70,7 +70,9 @@ def getScaleFactorToTotalLumi(sample, scaleFor):
     elif scaleFor == 'data':
         return 20  # 1/0.05
     elif scaleFor == 'SP1074':
-        return alpFuncs.SCALE_MC_TO_DATA[sample.replace('Run', 'Y').lstrip('/')]
+        keyForScaleFactor = sample.replace('Run', 'Y').lstrip('/')
+        keyForScaleFactor = keyForScaleFactor[:keyForScaleFactor.find('_alpMass')]
+        return alpFuncs.SCALE_MC_TO_DATA[keyForScaleFactor]
     else:
         raise ValueError(f'{scaleFor} not supported yet')
 
@@ -80,7 +82,7 @@ def loadDfsFromHdf(filename, scaleFor):
     allGroups = generalFuncs.getHdfGroups(filename)
 
     groups1_6 = [group for group in allGroups if
-                 int(group[4]) in np.arange(1, 7) and ('S' not in group or '4' in group)]
+                 int(group[4]) in np.arange(1, 7) and ('S' not in group or '4S' in group)]
     dfs1_6 = []
     for group in groups1_6:
         df = pd.read_hdf(filename, group)
@@ -101,8 +103,36 @@ def loadDfsFromHdf(filename, scaleFor):
     return dfs
 
 
-def getDfForMass(alpMass, df):
-    return df[(df.eta_Mass > alpMass - 0.15) & (df.eta_Mass < alpMass + 0.15)]
+def getGroupsForRun_Mass(Run, alpMass, filename):
+    groupsForMass = [group for group in generalFuncs.getHdfGroups(filename) if str(alpMass) in group]
+
+    if Run == '1-6':
+        return [group for group in groupsForMass if 'S' not in group or '4S' in group]
+    elif Run == '7':
+        return [group for group in groupsForMass if 'S' in group and 'Run4' not in group]
+
+    raise ValueError(f'Run {Run} not supported')
+
+
+def getDf(Run, alpMass, filename, scaleFor):
+    groups = getGroupsForRun_Mass(Run, alpMass, filename)
+
+    dfs = [pd.read_hdf(filename, group) for group in groups]
+
+    #Add scale to total lumi factor
+    for i, group in enumerate(groups):
+        try:
+            dfs[i].loc[:,'scaleforTotalLumi'] = getScaleFactorToTotalLumi(group, scaleFor)
+        except ValueError as e:
+            if str(e) != 'cannot set a frame with no defined index and a scalar':
+                raise
+            if group != '/Run2S_alpMass10.0':
+                raise
+
+    df = pd.concat(dfs, sort=False)
+
+    addExtraColumns(df)
+    return df
 
 
 def splitFieldMinMax(string):
