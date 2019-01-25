@@ -64,8 +64,8 @@ def saveFig(fig, filename, folder='.', subFolder='', **kwargs):
         # the filename has a '.' which does not seperate the extension
         fullFilename_noExt = fullFilename_noExt + ext
         # otherwise, save multiple filetypes
-        _saveFigFlat(fig, fullFilename_noExt + '.png')
-        _saveFigFlat(fig, fullFilename_noExt + '.pdf')
+        _saveFigFlat(fig, fullFilename_noExt + '.png', **kwargs)
+        _saveFigFlat(fig, fullFilename_noExt + '.pdf', **kwargs)
         _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
 
