@@ -22,6 +22,21 @@ def theta(x, y, z):
     return np.arctan2(np.sqrt(x ** 2 + y ** 2), z)
 
 
+def phi(x, y, z):
+    return np.arctan2(y, z);
+
+
+def addPhiCM_deg(df):
+    df['gamma1_phiCM_deg'] = phi(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
+    df['gamma2_phiCM_deg'] = phi(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
+    df['gammaRecoil_phiCM_deg'] = phi(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM) * 180 / np.pi
+
+def addThetaCM_deg(df):
+    df['gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM)
+    df['gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM)
+    df['gammaRecoil_thetaCM_deg'] = theta(
+        df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM)
+
 def addThetaLab(df):
     df['gamma1_theta'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz)
     df['gamma2_theta'] = theta(df.gamma2_px, df.gamma2_py, df.gamma2_pz)
@@ -119,10 +134,10 @@ def getDf(Run, alpMass, filename, scaleFor):
 
     dfs = [pd.read_hdf(filename, group) for group in groups]
 
-    #Add scale to total lumi factor
+    # Add scale to total lumi factor
     for i, group in enumerate(groups):
         try:
-            dfs[i].loc[:,'scaleforTotalLumi'] = getScaleFactorToTotalLumi(group, scaleFor)
+            dfs[i].loc[:, 'scaleforTotalLumi'] = getScaleFactorToTotalLumi(group, scaleFor)
         except ValueError as e:
             if str(e) != 'cannot set a frame with no defined index and a scalar':
                 raise
