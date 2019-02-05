@@ -1,3 +1,7 @@
+import os
+import glob
+import warnings
+
 import numpy as np
 import pandas as pd
 import uncertainties
@@ -31,11 +35,13 @@ def addPhiCM_deg(df):
     df['gamma2_phiCM_deg'] = phi(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
     df['gammaRecoil_phiCM_deg'] = phi(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM) * 180 / np.pi
 
+
 def addThetaCM_deg(df):
     df['gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM)
     df['gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM)
     df['gammaRecoil_thetaCM_deg'] = theta(
         df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM)
+
 
 def addThetaLab(df):
     df['gamma1_theta'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz)
@@ -186,3 +192,114 @@ def calcSensitivityFromDfs(signalDf, backgroundDf, cutDict, punziFactor):
 
 def filterDf(df, cutDict):
     return df[dictToFilter(df, **cutDict)]
+
+
+def getBkgFilename(Run, alpMass):
+    if Run == '1-6':
+        if np.isclose(alpMass, 6.5):
+            return 'massInCountingwindow_SP1074.h5'
+        else:
+            return 'massInCountingwindow_data5perc.h5'
+    elif Run == '7':
+        if np.isclose(alpMass, [0.5, 1.0]).any():
+            return 'massInCountingwindow_SP1074.h5'
+        else:
+            return 'massInCountingwindow_data5perc.h5'
+    else:
+        raise ValueError(f'Run {Run} not supported')
+
+
+def getRun(filename):
+    filename = os.path.basename(filename)
+    return filename[filename.find('Run') + 3: filename.rfind('_')]
+
+
+def getAlpMass(filename):
+    filename = os.path.basename(filename)
+    return filename[filename.find('alpMass') + 7: filename.rfind('.')]
+
+
+def loadDfsFromFolder(folder):
+    files = glob.glob(os.path.join(folder, 'csv', '*.csv'))
+    result = {}
+    for file in files:
+        df = pd.read_csv(file)
+        try:
+            result[getRun(file)][float(getAlpMass(file))] = df
+        except KeyError:
+            result[getRun(file)] = {}
+            result[getRun(file)][float(getAlpMass(file))] = df
+    return result
+
+
+def getDfs(folders):
+    dfs = {}
+    for folder in folders:
+        dfs[os.path.basename(folder)] = loadDfsFromFolder(folder)
+    return dfs
+
+
+def getRowsColumn(df, rowVal, column=None):
+    result = df[df['Unnamed: 0'] == rowVal]
+    if isinstance(column, int):
+        columns = result.columns
+        result = result[columns[column]]
+    elif column:
+        result = result[column]
+    return result
+
+
+def getLabel(sample):
+    sample = sample.replace('data5perc', '5% Data')
+    return sample[:sample.find('_')]
+
+    # Add punzi factor info
+
+
+#     try:
+#         punziFactor = float(sample[sample.find('punzi')+5:])
+#         sample = sample.replace(
+#             '_s_sqrtB_punzi', f' $S/({punziFactor} + \sqrt{{B}})$')
+#         sample = sample[:-3]
+#     except:
+#         pass
+
+#     sample = sample.replace('_s_sqrtB', r' $S/\sqrt{B}$')
+#     return sample
+
+def getMultiDf(dfs):
+    iterables = [list(dfs.keys()), list(generalFuncs.getArbitraryDictItem(dfs).keys()), sorted(
+        list(generalFuncs.getArbitraryDictItem(generalFuncs.getArbitraryDictItem(dfs)).keys()))]
+    index = pd.MultiIndex.from_product(
+        iterables, names=['sample', 'Run', 'alpMass'])
+
+    return pd.DataFrame(index=index).sort_index()
+
+
+def fillMultiDf(dfs, multiDf, columnsToExtract):
+    for sample in dfs:
+        for Run in sorted(list(dfs[sample].keys())):
+            alpMasses = sorted(dfs[sample][Run].keys())
+
+            for column in columnsToExtract:
+                if 'Final' in column:
+                    csvColumn = -1
+                else:
+                    raise ValueError(f'Columns {column} not supported')
+
+                multiDf.loc[(sample, Run), column] = np.array(
+                    [getRowsColumn(dfs[sample][Run][alpMass], column.split(' ')[1], csvColumn).tail(1).values
+                     for alpMass in alpMasses])
+
+            # Add optimal values
+            for variable in generalFuncs.getArbitraryDictItem(
+                    generalFuncs.getArbitraryDictItem(generalFuncs.getArbitraryDictItem(dfs))).columns:
+                if variable in ['Unnamed: 0', 'Run', 'alpMass', 'beforeCuts']:
+                    continue
+                try:
+                    multiDf.loc[(sample, Run), f'Optimal {variable}'] = np.array(
+                        [getRowsColumn(dfs[sample][Run][alpMass], 'optimalValues', variable).tail(1).values
+                         for alpMass in alpMasses])
+                except KeyError as e:
+                    warnings.warn(f'Couldn\'t find key {e}')
+                    pass

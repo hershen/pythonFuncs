@@ -87,3 +87,14 @@ def test_getGroupsForRun_Mass():
                 with mock.patch('generalFuncs.getHdfGroups', side_effect=getGroup):
                     assert cutsFuncs.getGroupsForRun_Mass(Run, alpMass, filename) == expectedGroups[filename][Run][
                         alpMass]
+
+
+def test_getBkgFilename():
+    assert cutsFuncs.getBkgFilename('1-6',0.5) == 'massInCountingwindow_data5perc.h5'
+    assert cutsFuncs.getBkgFilename('1-6', 6.5) == 'massInCountingwindow_SP1074.h5'
+    assert cutsFuncs.getBkgFilename('1-6', 7.0) == 'massInCountingwindow_data5perc.h5'
+
+    assert cutsFuncs.getBkgFilename('7', 0.5) == 'massInCountingwindow_SP1074.h5'
+    assert cutsFuncs.getBkgFilename('7', 1.0) == 'massInCountingwindow_SP1074.h5'
+    assert cutsFuncs.getBkgFilename('7', 1.5) == 'massInCountingwindow_data5perc.h5'
+    assert cutsFuncs.getBkgFilename('7', 9.5) == 'massInCountingwindow_data5perc.h5'
