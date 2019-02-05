@@ -16,3 +16,6 @@ def getHdfGroups(filename):
 
     with pd.HDFStore(filename) as file:
         return list(file.keys())
+
+def getArbitraryDictItem(d):
+    return next(iter(d.values()))
