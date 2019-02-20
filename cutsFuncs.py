@@ -26,14 +26,27 @@ def theta(x, y, z):
     return np.arctan2(np.sqrt(x ** 2 + y ** 2), z)
 
 
-def phi(x, y, z):
-    return np.arctan2(y, z);
-
-
 def addPhiCM_deg(df):
-    df['gamma1_phiCM_deg'] = phi(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
-    df['gamma2_phiCM_deg'] = phi(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
-    df['gammaRecoil_phiCM_deg'] = phi(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM) * 180 / np.pi
+    df['gamma1_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
+    df['gamma2_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
+    df['gammaRecoil_phiCM_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM,
+                                                    df.gammaRecoil_pzCM) * 180 / np.pi
+
+
+def addAcolPhiCM_deg(df):
+    df['acolPhi12CM_deg'] = df.gamma1_phiCM_deg - df.gamma2_phiCM_deg - 180
+    df['acolPhi1recoilCM_deg'] = df.gamma1_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
+    df['acolPhi2recoilCM_deg'] = df.gamma2_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
+
+    # Make sure delta phi is in range [-180, 180]
+    for field in ['acolPhi12CM_deg', 'acolPhi1recoilCM_deg', 'acolPhi2recoilCM_deg']:
+        df.loc[df[field] < 180, field] += 360
+        df.loc[df[field] > 180, field] -= 360
+
+
+def addMinAbsAcolPhiCM_deg(df):
+    df['minAbsAcolPhiCM_deg'] = df.loc[:,
+                                ('acolPhi12CM_deg', 'acolPhi1recoilCM_deg', 'acolPhi2recoilCM_deg')].abs().min(axis=1)
 
 
 def addThetaCM_deg(df):
@@ -79,8 +92,8 @@ def addMaxAngleCM(df):
 
 
 def addExtraColumns(df):
-    functionsThatAdd = [addMinEcm, addMinE12cm, addThetaLab,
-                        addMinTheta, addMaxTheta, addAngleCM, addMaxAngleCM]
+    functionsThatAdd = [addMinE12cm, addThetaLab,
+                        addMinTheta, addMaxTheta, addAngleCM, addMaxAngleCM, addPhiCM_deg, addAcolPhiCM_deg, addMinAbsAcolPhiCM_deg]
     for func in functionsThatAdd:
         func(df)
 
