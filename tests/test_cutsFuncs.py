@@ -6,12 +6,24 @@ import numpy as np
 
 import cutsFuncs
 
+_commonMases = np.concatenate(
+                       [np.arange(0.1, 0.5, 0.1), np.arange(0.6, 1.0, 0.1), np.arange(0.5, 10.5, 0.5),
+                        np.array([0.135, 0.548, 0.958])])
+
 signalHdfGroups = [f'/Run{Run}_alpMass{alpMass}' for Run, alpMass in
-                   itertools.product(list(range(1, 7)) + ['2S', '3S'], np.arange(0.5, 10.5, 0.5))]
+                   itertools.product(list(range(1, 7)) + ['2S', '3S'], _commonMases)]
+signalHdfGroups = signalHdfGroups + [f'/Run{Run}_alpMass{alpMass}' for Run, alpMass in
+                   itertools.product(list(range(1, 7)) , [10.3, 10.4, 10.5])]
+
 data5perHdfGroups = [f'/Run{Run}_{OnOff}Peak_alpMass{alpMass}' for Run, OnOff, alpMass in
-                     itertools.product(list(range(1, 7)) + ['2S', '3S'], ['On', 'Off'], np.arange(0.5, 10.5, 0.5))]
+                     itertools.product(list(range(1, 7)) + ['2S', '3S'], ['On', 'Off'], _commonMases)]
+data5perHdfGroups = data5perHdfGroups + [f'/Run{Run}_{OnOff}Peak_alpMass{alpMass}' for Run, OnOff, alpMass in
+                     itertools.product(list(range(1, 7)) , ['On', 'Off'], [10.3, 10.4, 10.5])]
+
 SP1074HdfGroups = [f'/Run{Run}_{OnOff}Peak_alpMass{alpMass}' for Run, OnOff, alpMass in
-                   itertools.product(['2S', '3S', '4S'], ['On', 'Off'], np.arange(0.5, 10.5, 0.5))]
+                   itertools.product(['2S', '3S', '4S'], ['On', 'Off'], _commonMases)]
+SP1074HdfGroups = SP1074HdfGroups + [f'/Run{Run}_{OnOff}Peak_alpMass{alpMass}' for Run, OnOff, alpMass in
+                   itertools.product(['4S'], ['On', 'Off'], [10.3, 10.4, 10.5])]
 
 filename2groups = {'massInCountingwindow_data5perc.h5': data5perHdfGroups,
                    'massInCountingwindow_signal.h5': signalHdfGroups,
@@ -90,7 +102,7 @@ def test_getGroupsForRun_Mass():
 
 
 def test_getBkgFilename():
-    assert cutsFuncs.getBkgFilename('1-6',0.5) == 'massInCountingwindow_data5perc.h5'
+    assert cutsFuncs.getBkgFilename('1-6', 0.5) == 'massInCountingwindow_data5perc.h5'
     assert cutsFuncs.getBkgFilename('1-6', 6.5) == 'massInCountingwindow_SP1074.h5'
     assert cutsFuncs.getBkgFilename('1-6', 7.0) == 'massInCountingwindow_data5perc.h5'
 

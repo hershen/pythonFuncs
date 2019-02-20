@@ -140,7 +140,7 @@ def loadDfsFromHdf(filename, scaleFor):
 
 
 def getGroupsForRun_Mass(Run, alpMass, filename):
-    groupsForMass = [group for group in generalFuncs.getHdfGroups(filename) if str(alpMass) in group]
+    groupsForMass = [group for group in generalFuncs.getHdfGroups(filename) if group.endswith('Mass' + str(alpMass))]
 
     if Run == '1-6':
         return [group for group in groupsForMass if 'S' not in group or '4S' in group]
