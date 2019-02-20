@@ -1,3 +1,4 @@
+import itertools
 import os
 import glob
 import warnings
@@ -292,10 +293,13 @@ def getLabel(sample):
 #     return sample
 
 def getMultiDf(dfs):
-    iterables = [list(dfs.keys()), list(generalFuncs.getArbitraryDictItem(dfs).keys()), sorted(
-        list(generalFuncs.getArbitraryDictItem(generalFuncs.getArbitraryDictItem(dfs)).keys()))]
-    index = pd.MultiIndex.from_product(
-        iterables, names=['sample', 'Run', 'alpMass'])
+    arrays = []
+    for Run in generalFuncs.getArbitraryDictItem(dfs).keys():
+        arrays = arrays + list(itertools.product(dfs.keys(), [Run], sorted(
+            generalFuncs.getArbitraryDictItem(dfs)[Run].keys())))
+
+    index = pd.MultiIndex.from_tuples(
+        arrays, names=['sample', 'Run', 'alpMass'])
 
     return pd.DataFrame(index=index).sort_index()
 
@@ -311,7 +315,7 @@ def fillMultiDf(dfs, multiDf, columnsToExtract):
                 else:
                     raise ValueError(f'Columns {column} not supported')
 
-                multiDf.loc[(sample, Run), column] = np.array(
+                multiDf.loc[(sample, Run, alpMasses), column] = np.array(
                     [getRowsColumn(dfs[sample][Run][alpMass], column.split(' ')[1], csvColumn).tail(1).values
                      for alpMass in alpMasses])
 
