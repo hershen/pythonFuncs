@@ -93,7 +93,8 @@ def addMaxAngleCM(df):
 
 def addExtraColumns(df):
     functionsThatAdd = [addMinE12cm, addThetaLab,
-                        addMinTheta, addMaxTheta, addAngleCM, addMaxAngleCM, addPhiCM_deg, addAcolPhiCM_deg, addMinAbsAcolPhiCM_deg]
+                        addMinTheta, addMaxTheta, addAngleCM, addMaxAngleCM, addPhiCM_deg, addAcolPhiCM_deg,
+                        addMinAbsAcolPhiCM_deg]
     for func in functionsThatAdd:
         func(df)
 
@@ -326,6 +327,7 @@ def fillMultiDf(dfs, multiDf, columnsToExtract):
                 except KeyError as e:
                     warnings.warn(f'Couldn\'t find key {e}')
                     pass
+
 
 def printOptimalCuts(multiDf):
     for field in [column for column in multiDf.columns if 'Optimal' in column]:
