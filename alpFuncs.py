@@ -5,6 +5,8 @@ import pandas as pd
 import glob
 import os
 
+import numpy as np
+
 SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436278194778745,
                     'Y2S_OnPeak': 0.426093591118402,
                     'Y3S_OffPeak': 0.29208690815739,
@@ -200,3 +202,14 @@ def getDatasets(Runs):
 def getTriggered(df):
     return (df.DigiFGammaGamma == 1) | (df.DigiFSingleGamma == 1) | \
            (((df.L3OutDch == 1) | (df.L3OutEmc == 1)) & (df.BGFSingleGammaInvisible == 1))
+
+_nominalAlpMasses = list(np.arange(0.5, 10.5, 0.5))
+_highAlpMasses = [10.3, 10.4, 10.5]
+_lowAlpMasses = [0.1, 0.135, 0.15, 0.2, 0.25, 0.3, 0.4, 0.548, 0.6, 0.7, 0.8, 0.9, 0.958]
+
+def getAlpMasses(Run='all'):
+    res = _lowAlpMasses.copy() + _nominalAlpMasses.copy()
+    if Run == '1-6' or Run == 'all':
+        res = res + _highAlpMasses.copy()
+    res.sort()
+    return res
