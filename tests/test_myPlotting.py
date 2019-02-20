@@ -224,24 +224,16 @@ def test_weightsForArea():
         expectedWeights = [area / binwidth / len(array)] * len(array)
 
         assert np.allclose(expectedWeights, myPlotting.weightsForArea(area, binwidth, array))
-        #
-        # # entries outside bin range
-        # array = np.random.normal(loc=len(tops) / 2, scale=100, size=400)
-        # entriesInRange = ((array > bins[0]) & (array < len(tops) - 1)).sum()
-        # expectedWeights = [sum(tops) * binwidth / entriesInRange] * len(array)
-        # assert np.allclose(expectedWeights, myPlotting.weightsForArea(tops, binwidth, array, range=[0, len(tops) - 1]))
 
 
 def test_getOptimalRange():
-
-    #negative range
+    # negative range
     with pytest.raises(ValueError):
         myPlotting.getOptimalRange(lowEdge=123, highEdge=0, nBins=1000, binWidths=[0.0625, 0.125, 0.25, 0.5])
 
     # bin width above bin width range
     with pytest.raises(ValueError):
         myPlotting.getOptimalRange(lowEdge=0, highEdge=123, nBins=100, binWidths=[0.0625, 0.125, 0.25, 0.5])
-
 
     assert np.allclose(
         myPlotting.getOptimalRange(lowEdge=0, highEdge=123, nBins=1000, binWidths=[0.0625, 0.125, 0.25, 0.5]),
