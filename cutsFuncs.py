@@ -266,8 +266,15 @@ def getRowsColumn(df, rowVal, column=None):
 
 
 def getLabel(sample):
-    sample = sample.replace('data5perc', '5% Data')
-    return sample[:sample.find('_')]
+    label = sample.replace('data5perc', '5% Data')
+    label = label[:label.find('_')]
+    if label == 'hybrid':
+        if 'uncMass' in sample:
+            label = 'Upsilon'
+        else:
+            label = 'pi0'
+
+    return label
 
     # Add punzi factor info
 
