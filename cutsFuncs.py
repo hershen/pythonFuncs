@@ -248,7 +248,10 @@ def loadDfsFromFolder(folder):
 def getDfs(folders):
     dfs = {}
     for folder in folders:
-        dfs[os.path.basename(folder)] = loadDfsFromFolder(folder)
+        df = loadDfsFromFolder(folder)
+        if len(df) == 0:
+            raise ValueError(f'Cannot load from {folder}')
+        dfs[os.path.basename(folder)] = df
     return dfs
 
 
