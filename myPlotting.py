@@ -1,12 +1,18 @@
 #!/usr/bin/python3
+import math
 import pickle as pl
 import os
-import ROOT
-import numpy as np
-import mathFuncs
-import root_numpy
+import warnings
+
 import matplotlib
-import math
+import numpy as np
+import ROOT
+import root_numpy
+
+import mathFuncs
+
+
+
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen, ROOT.kMagenta, ROOT.kCyan, ROOT.kYellow]
 
@@ -44,6 +50,9 @@ def _saveFigPickled(fig, fullFilename):
 
 def saveFig(fig, filename, folder='.', subFolder='', **kwargs):
     """ Save a pyplot figure """
+
+    if 'subfolder' in kwargs:
+        warnings.warn('Are you sure you didn\'t mean \'subFolder\'?')
 
     fullDir = os.path.join(folder, 'figureDump', subFolder)
 
@@ -437,24 +446,26 @@ def latex_float(x, precision=3):
         return string
 
 
-def weightsForSameArea(otherTops, otherBins, array, range=None):
+def weightsForArea(targetArea, otherBinWidth, thisArray, range=None):
     """
 
-    :param otherTops: top of bins of histogram that we're comparing to
-    :param otherBins: bin boundaries of histogram that we're comparing to
-    :param array: The array we're going to histogram
-    :param range: Optional range of the histogram - we don't want entries oustside this range to change our weights
-    :return: weights to use for histograming
+    :param targetArea: Target area for histogram
+    :param otherBinWidth: Bin width of other histogram
+    :param thisArray: The array used to create this histogram
+    # :param range: Optional range of the histogram - we don't want entries oustside this range to change our weights
+    # weights to use for histograming
+    :return: weights array so that hist has targetArea
     """
-    binWidth = otherBins[1] - otherBins[0]
-    otherArea = sum(otherTops) * binWidth
-
+    #
+    # if range:
+    #     numEntriesInRange = ((array >= range[0]) & (array <= range[1])).sum()
+    # else:
+    #     numEntriesInRange = len(array)
     if range:
-        numEntriesInRange = ((array >= range[0]) & (array <= range[1])).sum()
-    else:
-        numEntriesInRange = len(array)
+        raise ValueError("Need to implement range support")
 
-    return [otherArea / numEntriesInRange / binWidth] * len(array)
+    numEntries = len(thisArray)
+    return [targetArea / numEntries / otherBinWidth] * numEntries
 
 
 def getOptimalRange(lowEdge, highEdge, nBins, binWidths):
