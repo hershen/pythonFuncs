@@ -320,9 +320,21 @@ def fillMultiDf(dfs, multiDf, columnsToExtract):
                 if variable in ['Unnamed: 0', 'Run', 'alpMass', 'beforeCuts']:
                     continue
                 try:
-                    multiDf.loc[(sample, Run), f'Optimal {variable}'] = np.array(
+                    multiDf.loc[(sample, Run, alpMasses), f'Optimal {variable}'] = np.array(
                         [getRowsColumn(dfs[sample][Run][alpMass], 'optimalValues', variable).tail(1).values
                          for alpMass in alpMasses])
                 except KeyError as e:
                     warnings.warn(f'Couldn\'t find key {e}')
                     pass
+
+def printOptimalCuts(multiDf):
+    for field in [column for column in multiDf.columns if 'Optimal' in column]:
+
+        for sample in multiDf.index.levels[0]:
+            for Run in multiDf.index.levels[1]:
+                alpMasses = multiDf.index.levels[2]
+
+                print(f'field {field}, Run {Run}')
+                values = multiDf.loc[(sample, Run), field].values
+                values = [str(x) for x in values]
+                print('{' + ', '.join(values) + '};')
