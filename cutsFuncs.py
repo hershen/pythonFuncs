@@ -211,12 +211,12 @@ def filterDf(df, cutDict):
 
 def getBkgFilename(Run, alpMass):
     if Run == '1-6':
-        if np.isclose(alpMass, 6.5):
+        if np.isclose(alpMass, [0.4, 6.5, 7.0]).any():
             return 'massInCountingwindow_SP1074.h5'
         else:
             return 'massInCountingwindow_data5perc.h5'
     elif Run == '7':
-        if np.isclose(alpMass, [0.5, 1.0]).any():
+        if np.isclose(alpMass, [0.1, 0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]).any():
             return 'massInCountingwindow_SP1074.h5'
         else:
             return 'massInCountingwindow_data5perc.h5'
