@@ -194,7 +194,7 @@ def count(df, **args):
 
 def calcSensitivity(S, B, punziFactor):
     if B == 0:
-        return -1
+        return uncertainties.ufloat(-np.inf, np.inf)
     return uncertainties.ufloat(S, umath.sqrt(S)) / (punziFactor + umath.sqrt(uncertainties.ufloat(B, np.sqrt(B))))
 
 
