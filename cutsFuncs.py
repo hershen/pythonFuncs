@@ -210,6 +210,10 @@ def filterDf(df, cutDict):
 
 
 def getBkgFilename(Run, alpMass):
+    """
+    If 5% of the data had less than 100 background events
+    that passed all cuts, use SP1074, otherwise use data.
+    """
     if Run == '1-6':
         if np.isclose(alpMass, [0.4, 6.5, 7.0]).any():
             return 'massInCountingwindow_SP1074.h5'
