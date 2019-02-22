@@ -208,25 +208,25 @@ def calcSensitivityFromDfs(signalDf, backgroundDf, cutDict, punziFactor):
 def filterDf(df, cutDict):
     return df[dictToFilter(df, **cutDict)]
 
+def getSP1074MassesForCuts(Run):
+    if Run == '1-6':
+        return [0.4, 6.5, 7.0]
+    elif Run == '7':
+        return [0.1, 0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]
+    else:
+        raise ValueError(f'Run {Run} not supported')
+
+
 
 def getBkgFilename(Run, alpMass):
     """
     If 5% of the data had less than 100 background events
     that passed all cuts, use SP1074, otherwise use data.
     """
-    if Run == '1-6':
-        if np.isclose(alpMass, [0.4, 6.5, 7.0]).any():
-            return 'massInCountingwindow_SP1074.h5'
-        else:
-            return 'massInCountingwindow_data5perc.h5'
-    elif Run == '7':
-        if np.isclose(alpMass, [0.1, 0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]).any():
-            return 'massInCountingwindow_SP1074.h5'
-        else:
-            return 'massInCountingwindow_data5perc.h5'
+    if np.isclose(alpMass, getSP1074MassesForCuts(Run)).any():
+        return 'massInCountingwindow_SP1074.h5'
     else:
-        raise ValueError(f'Run {Run} not supported')
-
+        return 'massInCountingwindow_data5perc.h5'
 
 def getRun(filename):
     filename = os.path.basename(filename)
