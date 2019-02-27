@@ -109,7 +109,7 @@ def test_getBkgFilename():
     assert cutsFuncs.getBkgFilename('1-6', 7.0) == 'massInCountingwindow_SP1074.h5'
     assert cutsFuncs.getBkgFilename('1-6', 8.0) == 'massInCountingwindow_data5perc.h5'
 
-    assert cutsFuncs.getBkgFilename('7', 0.1) == 'massInCountingwindow_SP1074.h5'
+    assert cutsFuncs.getBkgFilename('7', 0.1) == 'massInCountingwindow_data5perc.h5'
     assert cutsFuncs.getBkgFilename('7', 0.15) == 'massInCountingwindow_data5perc.h5'
     assert cutsFuncs.getBkgFilename('7', 0.25) == 'massInCountingwindow_SP1074.h5'
     assert cutsFuncs.getBkgFilename('7', 1.0) == 'massInCountingwindow_SP1074.h5'
@@ -121,6 +121,6 @@ def test_getBkgFilename():
 
 def test_getSP1074MassesForCuts():
     assert np.allclose(cutsFuncs.getSP1074MassesForCuts('1-6'), [0.4, 6.5, 7.0])
-    assert np.allclose(cutsFuncs.getSP1074MassesForCuts('7'), [0.1, 0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0])
+    assert np.allclose(cutsFuncs.getSP1074MassesForCuts('7'), [0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0])
     with pytest.raises(ValueError):
         cutsFuncs.getSP1074MassesForCuts('8')
