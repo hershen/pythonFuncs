@@ -47,12 +47,9 @@ def test_getSignalFilenames():
     Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7', '1-7']
     for Run in Runs:
         for alpMass in alpFuncs.getAlpMasses(Run):
-            filenames = alpFuncs.getSignalFilenames(alpMass, Run)
-            assert len(filenames) > 0
-            if alpMass <= 1:
-                assert '_minE12cmCut' in filenames[0]
-            else:
-                assert '_minE12cmCut' not in filenames[0]
+            assert '_minE12cmCut' not in alpFuncs.getSignalFilenames(alpMass, Run)[0]
+            if alpMass <= 1.0:
+                assert '_minE12cmCut' in alpFuncs.getSignalFilenames(alpMass, Run, 0.05)[0]
 
 
 def test_getDatasets():
@@ -63,14 +60,16 @@ def test_getDatasets():
 
 
 _signalFileFolder = '/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig'
-_signalLooseMinE12cmFolder = 'looseMinE12cmCut'
+_signalMinE12cm005Folder = 'looseMinE12cmCut/0.05'
 
 
-@pytest.mark.parametrize("Run, alpMass",
-                         [vals for Run in ['1-6', '7', '2S', '3S'] for vals in
-                          itertools.product([Run], alpFuncs.getAlpMasses(Run))])
-def test_getNumberOfGeneratedSignal(Run, alpMass):
-    signalFolder = os.path.join(_signalFileFolder, _signalLooseMinE12cmFolder if alpMass <= 1.0 else '')
+@pytest.mark.parametrize("Run, alpMass, signalSubDir",
+                         [(Run, alpMass, '') for Run in ['1-6', '7', '2S', '3S'] for (Run, alpMass) in
+                          itertools.product([Run], alpFuncs.getAlpMasses(Run))] +
+                         [(Run, alpMass, _signalMinE12cm005Folder) for Run in ['1-6', '7', '2S', '3S'] for
+                          (Run, alpMass) in itertools.product([Run], alpFuncs.getAlpMasses(Run)) if alpMass <= 1.0])
+def test_getNumberOfGeneratedSignal(Run, alpMass, signalSubDir):
+    signalFolder = os.path.join(_signalFileFolder, signalSubDir)
     if Run == '1-6':
         RunIdentifier = 'Run'
     elif Run == '7':
@@ -84,4 +83,7 @@ def test_getNumberOfGeneratedSignal(Run, alpMass):
 
     chain = ROOT.TChain('ntp1')
     chain.Add(filenameTemplate)
+
+    print(filenameTemplate)
+
     assert alpFuncs.getNumberOfGeneratedSignal(Run, alpMass) == chain.GetEntries()

@@ -71,17 +71,20 @@ def loadDF(filenames, columns=None, tree="ntp1", preselection=None):
     return df
 
 
-def getSignalFilenames(alpMass, Run):
+def getSignalFilenames(alpMass, Run, minE12cm=None):
     """
     Return list of SIGNAL filenames that match parameters
     :param alpMass: float
     :param Run: Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, 1-7
+    :param minE12cm: minE12cm cut. Default is 0.7 GeV
     :return: list of filenames
     """
 
-    subFolder = '/looseMinE12cmCut' if alpMass <= 1.0 else ''
-
-    baseFolder = f'/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig{subFolder}/flatNtuples'
+    if minE12cm:
+        subFolder = os.path.join('looseMinE12cmCut', str(minE12cm))
+    else:
+        subFolder = ''
+    baseFolder = f'/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig/{subFolder}/flatNtuples'
     baseFilename = 'flat'
 
     baseFullFilename = os.path.join(baseFolder, baseFilename)
@@ -115,7 +118,7 @@ def getSignalFilenames(alpMass, Run):
     return filenames
 
 
-def getSignalData(alpMass, Run, columns, mcMatched, preselection=None):
+def getSignalData(alpMass, Run, columns, mcMatched, preselection=None, minE12cm=None):
     """
     Return dataframe of SIGNAL events matching parameters
 
@@ -126,7 +129,7 @@ def getSignalData(alpMass, Run, columns, mcMatched, preselection=None):
     :return: dataframe
     """
 
-    filenames = getSignalFilenames(alpMass, Run)
+    filenames = getSignalFilenames(alpMass, Run, minE12cm)
 
     try:
         columnsToLoad = columns.copy()
