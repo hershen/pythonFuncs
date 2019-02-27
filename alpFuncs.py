@@ -71,23 +71,16 @@ def loadDF(filenames, columns=None, tree="ntp1", preselection=None):
     return df
 
 
-def getSignalFilenames(alpMass, Run, triggered):
+def getSignalFilenames(alpMass, Run):
     """
     Return list of SIGNAL filenames that match parameters
     :param alpMass: float
     :param Run: Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, 1-7
-    :param triggered: give triggered filenames
     :return: list of filenames
     """
 
-    if triggered:
-        raise DeprecationWarning("triggered not supported anymore")
-
     baseFolder = '/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig/flatNtuples'
     baseFilename = 'flat'
-    if triggered:
-        baseFolder = os.path.join(baseFolder, 'triggered')
-        baseFilename += '_triggered'
 
     baseFullFilename = os.path.join(baseFolder, baseFilename)
 
@@ -120,19 +113,18 @@ def getSignalFilenames(alpMass, Run, triggered):
     return filenames
 
 
-def getSignalData(alpMass, Run, columns, triggered, mcMatched, preselection=None):
+def getSignalData(alpMass, Run, columns, mcMatched, preselection=None):
     """
     Return dataframe of SIGNAL events matching parameters
 
     :param alpMass: float
     :param Run: string. Can be 1,2,3,4,5,6, 1-6, 2S, 3S, 7, all
     :param columns:
-    :param triggered: bool
     :param mcMatched: bool
     :return: dataframe
     """
 
-    filenames = getSignalFilenames(alpMass, Run, triggered)
+    filenames = getSignalFilenames(alpMass, Run)
 
     try:
         columnsToLoad = columns.copy()
