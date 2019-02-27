@@ -1,9 +1,14 @@
 #!/usr/bin/python3
-import alpFuncs
+import itertools
+import os
+
 import pandas as pd
+import ROOT
 import root_numpy
 import numpy as np
 import pytest
+
+import alpFuncs
 
 filename_Run3 = 'flat_mass7.00e+00_coup1.0000e-03_ISR_numEvents50000_1-Run3.01.root'
 filename_Y2S = 'flat_mass8.50e+00_coup1.0000e-03_Y2S_ISR_numEvents2500_3-Ups2S.01.root'
@@ -37,8 +42,9 @@ def test_loadDF(tmpdir):
     with pytest.warns(FutureWarning):
         pd.testing.assert_frame_equal(alpFuncs.loadDF(str(tempFile)), df)
 
+
 def test_getSignalFilenames():
-    Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7' , '1-7']
+    Runs = ['1', '2', '3', '4', '5', '6', '1-6', '2S', '3S', '7', '1-7']
     for Run in Runs:
         for alpMass in alpFuncs.getAlpMasses(Run):
             filenames = alpFuncs.getSignalFilenames(alpMass, Run)
@@ -54,3 +60,28 @@ def test_getDatasets():
     assert alpFuncs.getDatasets('7') == ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak']
     assert alpFuncs.getDatasets('1-7') == ['Y2S_OffPeak', 'Y2S_OnPeak', 'Y3S_OffPeak', 'Y3S_OnPeak', 'Y4S_OffPeak',
                                            'Y4S_OnPeak']
+
+
+_signalFileFolder = '/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig'
+_signalLooseMinE12cmFolder = 'looseMinE12cmCut'
+
+
+@pytest.mark.parametrize("Run, alpMass",
+                         [vals for Run in ['1-6', '7', '2S', '3S'] for vals in
+                          itertools.product([Run], alpFuncs.getAlpMasses(Run))])
+def test_getNumberOfGeneratedSignal(Run, alpMass):
+    signalFolder = os.path.join(_signalFileFolder, _signalLooseMinE12cmFolder if alpMass <= 1.0 else '')
+    if Run == '1-6':
+        RunIdentifier = 'Run'
+    elif Run == '7':
+        RunIdentifier = 'Ups'
+    elif Run == '2S':
+        RunIdentifier = 'Ups2'
+    elif Run == '3S':
+        RunIdentifier = 'Ups3'
+    filenameTemplate = os.path.join(signalFolder, f'mass{alpMass:.2e}*{RunIdentifier}*.root')
+    filenameTemplate = filenameTemplate.replace('+', '\\+')
+
+    chain = ROOT.TChain('ntp1')
+    chain.Add(filenameTemplate)
+    assert alpFuncs.getNumberOfGeneratedSignal(Run, alpMass) == chain.GetEntries()

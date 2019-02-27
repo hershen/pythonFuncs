@@ -197,9 +197,11 @@ def getTriggered(df):
     return (df.DigiFGammaGamma == 1) | (df.DigiFSingleGamma == 1) | \
            (((df.L3OutDch == 1) | (df.L3OutEmc == 1)) & (df.BGFSingleGammaInvisible == 1))
 
+
 _nominalAlpMasses = list(np.arange(0.5, 10.5, 0.5))
 _highAlpMasses = [10.3, 10.4, 10.5]
 _lowAlpMasses = [0.1, 0.135, 0.15, 0.2, 0.25, 0.3, 0.4, 0.548, 0.6, 0.7, 0.8, 0.9, 0.958]
+
 
 def getAlpMasses(Run='all'):
     res = _lowAlpMasses.copy() + _nominalAlpMasses.copy()
@@ -207,3 +209,28 @@ def getAlpMasses(Run='all'):
         res = res + _highAlpMasses.copy()
     res.sort()
     return res
+
+
+_massesWith10ksignalEvents = [0.02, 0.05, 0.1, 0.135, 0.4]
+
+
+def getNumberOfGeneratedSignal(Run, alpMass):
+    if Run == '1-6':
+        return 49965
+    elif Run == '7':
+        if alpMass in _massesWith10ksignalEvents:
+            return 19996
+        else:
+            return 4997
+    elif Run == '2S':
+        if alpMass in _massesWith10ksignalEvents:
+            return 10000
+        else:
+            return 2500
+    elif Run == '3S':
+        if alpMass in _massesWith10ksignalEvents:
+            return 9996
+        else:
+            return 2497
+    else:
+        raise ValueError(f'Run {Run} not recognized')
