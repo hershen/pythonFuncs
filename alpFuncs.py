@@ -79,16 +79,18 @@ def getSignalFilenames(alpMass, Run):
     :return: list of filenames
     """
 
-    baseFolder = '/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig/flatNtuples'
+    subFolder = '/looseMinE12cmCut' if alpMass <= 1.0 else ''
+
+    baseFolder = f'/home/hershen/PhD/ALPs/analysis/ntuples/MC/sig{subFolder}/flatNtuples'
     baseFilename = 'flat'
 
     baseFullFilename = os.path.join(baseFolder, baseFilename)
 
     if Run == '1' or Run == '2' or Run == '3' or Run == '4' or Run == '5' or Run == '6':
-        fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Run{Run}.01.root'
+        fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Run{Run}.01*.root'
         expectedFiles = 1
     elif Run == '1-6':
-        fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Run?.01.root'
+        fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Run?.01*.root'
         expectedFiles = 6
     elif Run == '2S':
         fileTemplate = f'{baseFullFilename}_mass{alpMass:.2e}*Y2S*-Ups2S*.root'
