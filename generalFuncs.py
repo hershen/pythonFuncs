@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import errno
+import fnmatch
 import os
 
 import pandas as pd
@@ -19,3 +20,13 @@ def getHdfGroups(filename):
 
 def getArbitraryDictItem(d):
     return next(iter(d.values()))
+
+def deleteHdfGroups(filename, pattern):
+    with pd.HDFStore(filename) as file:
+        groups = list(file.keys())
+
+    groupsToRemove = fnmatch.filter(groups, pattern)
+
+    with pd.HDFStore(filename) as file:
+        for groupToRemove in groupsToRemove:
+            file.remove(groupToRemove)
