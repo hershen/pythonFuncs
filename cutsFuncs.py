@@ -208,6 +208,7 @@ def calcSensitivityFromDfs(signalDf, backgroundDf, cutDict, punziFactor):
 def filterDf(df, cutDict):
     return df[dictToFilter(df, **cutDict)]
 
+
 def getSP1074MassesForCuts(Run):
     if Run == '1-6':
         return [0.4, 6.5, 7.0]
@@ -215,7 +216,6 @@ def getSP1074MassesForCuts(Run):
         return [0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]
     else:
         raise ValueError(f'Run {Run} not supported')
-
 
 
 def getBkgFilename(Run, alpMass):
@@ -227,6 +227,7 @@ def getBkgFilename(Run, alpMass):
         return 'massInCountingwindow_SP1074.h5'
     else:
         return 'massInCountingwindow_data5perc.h5'
+
 
 def getRun(filename):
     filename = os.path.basename(filename)
@@ -337,14 +338,23 @@ def fillMultiDf(dfs, multiDf, columnsToExtract):
                     pass
 
 
+_field2cppVariables = {'Optimal minE12cmMin': 'const std::vector<double> minE12cm_Run',
+                       'Optimal minTheta_degMin': 'const std::vector<double> minTheta_deg_Run',
+                       'Optimal maxTheta_degMax': 'const std::vector<double> maxTheta_deg_Run',
+                       'Optimal chi2Max': 'const std::vector<double> chi2_Run',
+                       'Optimal minAbsAcolPhiCM_degMin': 'const std::vector<double> minAbsAcolPhiCM_degMin_Run',
+                       }
+_Run2cppRun = {'1-6': '16',
+               '7': '7'}
+
+
 def printOptimalCuts(multiDf):
     for field in [column for column in multiDf.columns if 'Optimal' in column]:
-
+        print('')
         for sample in multiDf.index.levels[0]:
             for Run in multiDf.index.levels[1]:
-                alpMasses = multiDf.index.levels[2]
 
-                print(f'field {field}, Run {Run}')
                 values = multiDf.loc[(sample, Run), field].values
                 values = [str(x) for x in values]
-                print('{' + ', '.join(values) + '};')
+                print(_field2cppVariables[field] + _Run2cppRun[Run] + ' = {' + ', '.join(values) + '};')
+                
