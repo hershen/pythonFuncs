@@ -58,17 +58,17 @@ def addMinAbsAcolPhiCM_deg(df):
 
 
 def addThetaCM_deg(df):
-    df['gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM)
-    df['gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM)
+    df['gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
+    df['gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
     df['gammaRecoil_thetaCM_deg'] = theta(
-        df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM)
+        df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM) * 180 / np.pi
 
 
-def addThetaLab(df):
-    df['gamma1_theta'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz)
-    df['gamma2_theta'] = theta(df.gamma2_px, df.gamma2_py, df.gamma2_pz)
-    df['gammaRecoil_theta'] = theta(
-        df.gammaRecoil_px, df.gammaRecoil_py, df.gammaRecoil_pz)
+def addThetaLab_deg(df):
+    df['gamma1_theta_deg'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
+    df['gamma2_theta_deg'] = theta(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
+    df['gammaRecoil_theta_deg'] = theta(
+        df.gammaRecoil_px, df.gammaRecoil_py, df.gammaRecoil_pz) * 180 / np.pi
 
 
 def addMinTheta(df):
