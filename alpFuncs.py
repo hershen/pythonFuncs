@@ -14,6 +14,15 @@ SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436278194778745,
                     'Y4S_OffPeak': 5.85653901412377,
                     'Y4S_OnPeak': 5.61997987743639}
 
+SCALE_SP1074_TO_DATA = SCALE_MC_TO_DATA
+
+SCALE_SP5797_TO_DATA = {'Y2S_OffPeak': 0.212249235772358,
+                        'Y2S_OnPeak': 0.211250957755102,
+                        'Y3S_OffPeak': 0.199735021929825,
+                        'Y3S_OnPeak': 0.236864720234604,
+                        'Y4S_OffPeak': 0.678979604596849,
+                        'Y4S_OnPeak': 0.656229936094144}
+
 
 def getMass(filename):
     """Return mass from the filename"""
