@@ -533,3 +533,17 @@ def myround(x, base=5, func=round):
     :return:
     """
     return base * func(float(x) / base)
+
+
+def rebin(tops, bins, n):
+    """
+    Group every n bins together
+    :param tops:
+    :param bins:
+    :param n:
+    :return:
+    """
+
+    groupedTops = tops.reshape(-1, n).sum(axis=1)
+    groupedBins = bins[::n]
+    return groupedTops, groupedBins
