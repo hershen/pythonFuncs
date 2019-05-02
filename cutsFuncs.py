@@ -372,8 +372,151 @@ def printOptimalCuts(multiDf):
         print('')
         for sample in multiDf.index.levels[0]:
             for Run in multiDf.index.levels[1]:
-
                 values = multiDf.loc[(sample, Run), field].values
                 values = [str(x) for x in values]
                 print(_field2cppVariables[field] + _Run2cppRun[Run] + ' = {' + ', '.join(values) + '};')
-                
+
+
+def getOptimalValues(multiDfLT10, multiDfGT10):
+    arrays = []
+    for Run in ['1-6', '7']:
+        arrays = arrays + list(itertools.product([Run], sorted(
+            alpFuncs.getAlpMasses(Run))))
+
+    index = pd.MultiIndex.from_tuples(arrays, names=['Run', 'alpMass'])
+
+    df = pd.DataFrame(index=index).sort_index()
+
+    columns = set()
+    for tmpDf in [multiDfLT10, multiDfGT10]:
+        for column in tmpDf.columns:
+            columns.add(column)
+
+    for variable in columns:
+        try:
+            # Mass <= 10
+            sample = multiDfLT10.index.levels[0][0]
+            for Run in multiDfLT10.index.levels[1]:
+                alpMasses = multiDfLT10.loc[(sample, Run)].index
+                alpMasses = alpMasses[alpMasses <= 10]
+                df.loc[(Run, alpMasses), variable] = multiDfLT10.loc[(
+                                                                         sample, Run, alpMasses), variable].values
+        except KeyError:
+            pass
+
+        # Mass > 10
+
+        #Don't do delta theta for m>10
+        if variable == 'Optimal absDeltaThetaLab12_degMin':
+            continue
+
+        sample = multiDfGT10.index.levels[0][0]
+        for Run in multiDfGT10.index.levels[1]:
+            alpMasses = multiDfGT10.loc[(sample, Run)].index
+            alpMasses = alpMasses[alpMasses > 10]
+            df.loc[(Run, alpMasses), variable] = multiDfGT10.loc[(
+                                                                     sample, Run, alpMasses), variable].values
+
+    return df
+
+
+def getSignalFilename(alpMass, bkgFilename):
+    if alpMass <= 1.0 and 'data' in bkgFilename:
+        return 'massInCountingwindow_signal_minE12cm0.05.h5'
+    else:
+        return 'massInCountingwindow_signal.h5'
+
+
+def getBkgScaleFor(bkgFilename):
+    if 'SP1074' in bkgFilename:
+        return 'SP1074'
+    elif 'data' in bkgFilename:
+        return 20
+    else:
+        raise ValueError(f'Background filename {bkgFilename} not recognized')
+
+
+def getNumGeneratedEvents(Run, alpMasses):
+    return [alpFuncs.getNumberOfGeneratedSignal(Run, mass) for mass in alpMasses]
+
+
+def getSmoothedCutDict(Run, alpMass, smoothCutsSplineDf):
+    cutDict = {}
+    for field in smoothCutsSplineDf.columns.levels[0]:
+        if alpMass <= 10 and field == 'minAbsAcolPhiCM_degMin':
+            continue
+        xVals = smoothCutsSplineDf.loc[Run, (field, 'xVals')]
+        yVals = smoothCutsSplineDf.loc[Run, (field, 'yVals')]
+        cutDict[field] = np.interp(alpMass, xVals, yVals)
+    return cutDict
+
+def getSimple_smoothedMinE12cmCutDict(Run, alpMass, smoothCutsSplineDf):
+    cutDict = getSimpleCutDict(Run, alpMass)
+    xVals = smoothCutsSplineDf.loc[Run, ('minE12cmMin', 'xVals')]
+    yVals = smoothCutsSplineDf.loc[Run, ('minE12cmMin', 'yVals')]
+    cutDict['minE12cmMin'] = np.interp(alpMass, xVals, yVals)
+    return cutDict
+
+def getSimpleCutDict(Run, alpMass):
+    cutDict = {'chi2Max': 100.0,
+               'minE12cmMin': 1, 'minTheta_degMin': 22.5}
+    if alpMass < 0.6:
+        cutDict['absDeltaThetaLab12_degMin'] = 1
+    if alpMass > 10:
+        cutDict['minAbsAcolPhiCM_degMin'] = 0.5
+    return cutDict
+
+def getSmoothCutsSpline(filename = '/home/hershen/PhD/ALPs/analysis/cuts/optimization/smoothCuts/smoothedCuts.hdf'):
+    return pd.read_hdf(filename, 'smooth')
+
+def addSimpleCuts(df, Run):
+    cutDict = getSimpleCutDict(Run, 3.0)
+
+    #Remove fields which will be handled later
+    try:
+        for field in ['simple_minAbsAcolPhiCM_degMin', 'absDeltaThetaLab12_degMin']:
+            cutDict.pop(field)
+    except KeyError:
+        pass
+
+    for field in cutDict.keys():
+        df['simple_' + field] = cutDict[field]
+
+    df['simple_minAbsAcolPhiCM_degMin'] = -1
+    df.loc[df.eta_Mass > 10, 'simple_minAbsAcolPhiCM_degMin'] = getSimpleCutDict(
+        Run, 10.3)['minAbsAcolPhiCM_degMin']
+
+    df['simple_absDeltaThetaLab12_degMin'] = -1
+    df.loc[df.eta_Mass <= 0.6, 'simple_absDeltaThetaLab12_degMin'] = getSimpleCutDict(
+        Run, 0.2)['absDeltaThetaLab12_degMin']
+
+def addSmoothedCuts(df, Run, smoothCutsSplineDf):
+    # ignore minAbsAcolPhiCM_degMin if Run 7
+    fields = [field for field in smoothCutsSplineDf.columns.levels[0]
+              if not np.isnan(smoothCutsSplineDf.loc[Run, (field, 'xVals')]).all()]
+
+    for field in fields:
+        xVals = smoothCutsSplineDf.loc[Run, (field, 'xVals')]
+        yVals = smoothCutsSplineDf.loc[Run, (field, 'yVals')]
+        df['smooth_' + field] = np.interp(df.eta_Mass, xVals, yVals)
+    if 'minAbsAcolPhiCM_degMin' in fields:
+        df.loc[df.eta_Mass <= 10, 'smooth_minAbsAcolPhiCM_degMin'] = -1
+
+def makeCuts(df, columns):
+    """
+    Take columns in the form of XXX_fieldnameMin/Max and return df that is filtered with them
+    :param df:
+    :param columns:
+    :return:
+    """
+    filt = np.ones(len(df), dtype=bool)
+    for field in columns:
+        variable, minMax = splitFieldMinMax(field)
+        variable = variable[variable.find('_')+1:]
+        if minMax == 'Max':
+            filt = np.logical_and(filt, df[variable] < df[field])
+        elif minMax == 'Min':
+            filt = np.logical_and(filt, df[variable] > df[field])
+        else:
+            raise ValueError(f'Field {field} should end with Min or Max')
+    return df[filt]
