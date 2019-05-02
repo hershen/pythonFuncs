@@ -71,16 +71,26 @@ def addThetaLab_deg(df):
         df.gammaRecoil_px, df.gammaRecoil_py, df.gammaRecoil_pz) * 180 / np.pi
 
 
-def addMinTheta(df):
-    df['minTheta_deg'] = df.loc[:,
-                         ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].min(axis=1) * 180. / np.pi
 def addAbsDeltaThetaLab_deg(df):
     df['absDeltaThetaLab12_deg'] = np.abs(df.gamma1_theta_deg - df.gamma2_theta_deg)
 
 
+def addMinTheta_deg(df):
+    try:
+        df['minTheta_deg'] = df.loc[:,
+                             ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].min(axis=1) * 180. / np.pi
+    except KeyError:
+        df['minTheta_deg'] = df.loc[:,
+                             ('gamma1_theta_deg', 'gamma2_theta_deg', 'gammaRecoil_theta_deg')].min(axis=1)
+
+
 def addMaxTheta(df):
-    df['maxTheta_deg'] = df.loc[:,
-                         ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].max(axis=1) * 180. / np.pi
+    try:
+        df['maxTheta_deg'] = df.loc[:,
+                             ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].max(axis=1) * 180. / np.pi
+    except KeyError:
+        df['maxTheta_deg'] = df.loc[:,
+                             ('gamma1_theta_deg', 'gamma2_theta_deg', 'gammaRecoil_theta_deg')].max(axis=1)
 
 
 def angleBetweenVectors_deg(v1_x, v1_y, v1_z, v2_x, v2_y, v2_z):
