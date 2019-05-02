@@ -72,12 +72,7 @@ def loadDF(filenames, columns=None, tree="ntp1", preselection=None):
         dfs.append(tmpDf)
 
     # Concat at end
-    df = pd.concat(dfs)
-
-    # change column names to strings
-    # df.columns = df.columns.astype(str)
-
-    return df
+    return pd.concat(dfs)
 
 
 def getSignalFilenames(alpMass, Run, minE12cm=None):
