@@ -230,9 +230,9 @@ def filterDf(df, cutDict):
 
 def getSP1074MassesForCuts(Run):
     if Run == '1-6':
-        return [0.4, 6.5, 7.0]
+        return [0.02, 0.2, 0.4, 6.5, 7.0]
     elif Run == '7':
-        return [0.135, 0.25, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]
+        return [0.02, 0.05, 0.1, 0.135, 0.2, 0.3, 0.4, 0.5, 0.548, 0.6, 0.9, 0.958, 1.0]
     else:
         raise ValueError(f'Run {Run} not supported')
 
