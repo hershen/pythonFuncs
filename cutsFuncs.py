@@ -74,6 +74,8 @@ def addThetaLab_deg(df):
 def addMinTheta(df):
     df['minTheta_deg'] = df.loc[:,
                          ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].min(axis=1) * 180. / np.pi
+def addAbsDeltaThetaLab_deg(df):
+    df['absDeltaThetaLab12_deg'] = np.abs(df.gamma1_theta_deg - df.gamma2_theta_deg)
 
 
 def addMaxTheta(df):
