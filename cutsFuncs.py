@@ -34,6 +34,13 @@ def addPhiCM_deg(df):
                                                     df.gammaRecoil_pzCM) * 180 / np.pi
 
 
+def addPhiLab_deg(df):
+    df['gamma1_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
+    df['gamma2_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
+    df['gammaRecoil_phiLab_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_px, df.gammaRecoil_py,
+                                                     df.gammaRecoil_pz) * 180 / np.pi
+
+
 def addAcolPhiCM_deg(df):
     df['acolPhi12CM_deg'] = df.gamma1_phiCM_deg - df.gamma2_phiCM_deg - 180
     df['acolPhi1recoilCM_deg'] = df.gamma1_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
