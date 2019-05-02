@@ -112,9 +112,9 @@ def addMaxAngleCM(df):
 
 
 def addExtraColumns(df):
-    functionsThatAdd = [addMinE12cm, addThetaLab,
-                        addMinTheta, addMaxTheta, addAngleCM, addMaxAngleCM, addPhiCM_deg, addAcolPhiCM_deg,
-                        addMinAbsAcolPhiCM_deg]
+    functionsThatAdd = [addMinE12cm, addThetaLab_deg,
+                        addMinTheta_deg, addMaxTheta, addAngleCM, addMaxAngleCM, addPhiCM_deg, addAcolPhiCM_deg,
+                        addMinAbsAcolPhiCM_deg, addAbsDeltaThetaLab_deg]
     for func in functionsThatAdd:
         func(df)
 
