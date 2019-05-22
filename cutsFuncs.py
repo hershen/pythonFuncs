@@ -512,7 +512,7 @@ def getFilterOfCuts(df, columns):
         elif minMax == 'Min':
             filt = np.logical_and(filt, df[variable] > df[field])
         else:
-            raise ValueError(f'Field {field} should end with Min or Max')
+            raise ValueError(f'Field {field} ends with {minMax}. It should end with Min or Max')
     return filt
 
 def makeCuts(df, columns):
