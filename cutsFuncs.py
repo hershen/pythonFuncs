@@ -502,13 +502,7 @@ def addSmoothedCuts(df, Run, smoothCutsSplineDf):
     if 'minAbsAcolPhiCM_degMin' in fields:
         df.loc[df.eta_Mass <= 10, 'smooth_minAbsAcolPhiCM_degMin'] = -1
 
-def makeCuts(df, columns):
-    """
-    Take columns in the form of XXX_fieldnameMin/Max and return df that is filtered with them
-    :param df:
-    :param columns:
-    :return:
-    """
+def getFilterOfCuts(df, columns):
     filt = np.ones(len(df), dtype=bool)
     for field in columns:
         variable, minMax = splitFieldMinMax(field)
@@ -519,4 +513,13 @@ def makeCuts(df, columns):
             filt = np.logical_and(filt, df[variable] > df[field])
         else:
             raise ValueError(f'Field {field} should end with Min or Max')
-    return df[filt]
+    return filt
+
+def makeCuts(df, columns):
+    """
+    Take columns in the form of XXX_fieldnameMin/Max and return df that is filtered with them
+    :param df:
+    :param columns:
+    :return:
+    """
+    return df[getFilterOfCuts(df, columns)]
