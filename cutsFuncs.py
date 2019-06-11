@@ -507,7 +507,13 @@ def getFilterOfCuts(df, columns):
     for field in columns:
         variable, minMax = splitFieldMinMax(field)
         variable = variable[variable.find('_')+1:]
-        if minMax == 'Max':
+        if 'absDeltaThetaLab12_degMin' in field:
+            df['failedDeltaThetaCut'] = df[variable] < df[field]
+            filt = np.logical_and(filt,
+                    df.groupby([df.entryNum.diff().ne(0).cumsum()]).failedDeltaThetaCut.transform('sum').ge(1)
+                        == False)
+            del df['failedDeltaThetaCut']
+        elif minMax == 'Max':
             filt = np.logical_and(filt, df[variable] < df[field])
         elif minMax == 'Min':
             filt = np.logical_and(filt, df[variable] > df[field])
