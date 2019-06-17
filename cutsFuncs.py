@@ -529,3 +529,14 @@ def makeCuts(df, columns):
     :return:
     """
     return df[getFilterOfCuts(df, columns)]
+
+def makeSmoothCuts(df, smoothCutsSplineDf, thetaMin_deg=22.5):
+    df = df[alpFuncs.getTriggered(df)]
+    cutsFuncs.addSmoothedCuts(df, Run, smoothCutsSplineDf)
+    df = df[df.minE12cm >= 0.7]
+    filtered = cutsFuncs.makeCuts(df, ['smooth_minE12cmMin', 'smooth_chi2Max',
+                                           'smooth_minAbsAcolPhiCM_degMin',
+                                           'smooth_absDeltaThetaLab12_degMin'])
+    filtered = filtered[filtered.minTheta_deg > thetaMin_deg]
+    return filtered
+
