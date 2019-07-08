@@ -14,12 +14,12 @@ import alpFuncs
 
 
 def addMinEcm(df):
-    df['minEcm'] = df.loc[:,
+    df.loc[:, 'minEcm'] = df.loc[:,
                    ('gamma1_energyCM', 'gamma2_energyCM', 'gammaRecoil_energyCM')].min(axis=1)
 
 
 def addMinE12cm(df):
-    df['minE12cm'] = df.loc[:,
+    df.loc[:, 'minE12cm'] = df.loc[:,
                      ('gamma1_energyCM', 'gamma2_energyCM')].min(axis=1)
 
 
@@ -28,23 +28,23 @@ def theta(x, y, z):
 
 
 def addPhiCM_deg(df):
-    df['gamma1_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
-    df['gamma2_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
-    df['gammaRecoil_phiCM_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM,
+    df.loc[:, 'gamma1_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
+    df.loc[:, 'gamma2_phiCM_deg'] = mathFuncs.phi_xyz(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
+    df.loc[:, 'gammaRecoil_phiCM_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_pxCM, df.gammaRecoil_pyCM,
                                                     df.gammaRecoil_pzCM) * 180 / np.pi
 
 
 def addPhiLab_deg(df):
-    df['gamma1_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
-    df['gamma2_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
-    df['gammaRecoil_phiLab_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_px, df.gammaRecoil_py,
+    df.loc[:, 'gamma1_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
+    df.loc[:, 'gamma2_phiLab_deg'] = mathFuncs.phi_xyz(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
+    df.loc[:, 'gammaRecoil_phiLab_deg'] = mathFuncs.phi_xyz(df.gammaRecoil_px, df.gammaRecoil_py,
                                                      df.gammaRecoil_pz) * 180 / np.pi
 
 
 def addAcolPhiCM_deg(df):
-    df['acolPhi12CM_deg'] = df.gamma1_phiCM_deg - df.gamma2_phiCM_deg - 180
-    df['acolPhi1recoilCM_deg'] = df.gamma1_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
-    df['acolPhi2recoilCM_deg'] = df.gamma2_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
+    df.loc[:, 'acolPhi12CM_deg'] = df.gamma1_phiCM_deg - df.gamma2_phiCM_deg - 180
+    df.loc[:, 'acolPhi1recoilCM_deg'] = df.gamma1_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
+    df.loc[:, 'acolPhi2recoilCM_deg'] = df.gamma2_phiCM_deg - df.gammaRecoil_phiCM_deg - 180
 
     # Make sure delta phi is in range [-180, 180]
     for field in ['acolPhi12CM_deg', 'acolPhi1recoilCM_deg', 'acolPhi2recoilCM_deg']:
@@ -53,43 +53,43 @@ def addAcolPhiCM_deg(df):
 
 
 def addMinAbsAcolPhiCM_deg(df):
-    df['minAbsAcolPhiCM_deg'] = df.loc[:,
+    df.loc[:, 'minAbsAcolPhiCM_deg'] = df.loc[:,
                                 ('acolPhi12CM_deg', 'acolPhi1recoilCM_deg', 'acolPhi2recoilCM_deg')].abs().min(axis=1)
 
 
 def addThetaCM_deg(df):
-    df['gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
-    df['gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
-    df['gammaRecoil_thetaCM_deg'] = theta(
+    df.loc[:, 'gamma1_thetaCM_deg'] = theta(df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM) * 180 / np.pi
+    df.loc[:, 'gamma2_thetaCM_deg'] = theta(df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM) * 180 / np.pi
+    df.loc[:, 'gammaRecoil_thetaCM_deg'] = theta(
         df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM) * 180 / np.pi
 
 
 def addThetaLab_deg(df):
-    df['gamma1_theta_deg'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
-    df['gamma2_theta_deg'] = theta(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
-    df['gammaRecoil_theta_deg'] = theta(
+    df.loc[:, 'gamma1_theta_deg'] = theta(df.gamma1_px, df.gamma1_py, df.gamma1_pz) * 180 / np.pi
+    df.loc[:, 'gamma2_theta_deg'] = theta(df.gamma2_px, df.gamma2_py, df.gamma2_pz) * 180 / np.pi
+    df.loc[:, 'gammaRecoil_theta_deg'] = theta(
         df.gammaRecoil_px, df.gammaRecoil_py, df.gammaRecoil_pz) * 180 / np.pi
 
 
 def addAbsDeltaThetaLab_deg(df):
-    df['absDeltaThetaLab12_deg'] = np.abs(df.gamma1_theta_deg - df.gamma2_theta_deg)
+    df.loc[:, 'absDeltaThetaLab12_deg'] = np.abs(df.gamma1_theta_deg - df.gamma2_theta_deg)
 
 
 def addMinTheta_deg(df):
     try:
-        df['minTheta_deg'] = df.loc[:,
+        df.loc[:, 'minTheta_deg'] = df.loc[:,
                              ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].min(axis=1) * 180. / np.pi
     except KeyError:
-        df['minTheta_deg'] = df.loc[:,
+        df.loc[:, 'minTheta_deg'] = df.loc[:,
                              ('gamma1_theta_deg', 'gamma2_theta_deg', 'gammaRecoil_theta_deg')].min(axis=1)
 
 
 def addMaxTheta(df):
     try:
-        df['maxTheta_deg'] = df.loc[:,
+        df.loc[:, 'maxTheta_deg'] = df.loc[:,
                              ('gamma1_theta', 'gamma2_theta', 'gammaRecoil_theta')].max(axis=1) * 180. / np.pi
     except KeyError:
-        df['maxTheta_deg'] = df.loc[:,
+        df.loc[:, 'maxTheta_deg'] = df.loc[:,
                              ('gamma1_theta_deg', 'gamma2_theta_deg', 'gammaRecoil_theta_deg')].max(axis=1)
 
 
@@ -98,16 +98,16 @@ def angleBetweenVectors_deg(v1_x, v1_y, v1_z, v2_x, v2_y, v2_z):
 
 
 def addAngleCM(df):
-    df['angle12CM_deg'] = angleBetweenVectors_deg(
+    df.loc[:, 'angle12CM_deg'] = angleBetweenVectors_deg(
         df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM, df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM)
-    df['angle1RecoilCM_deg'] = angleBetweenVectors_deg(
+    df.loc[:, 'angle1RecoilCM_deg'] = angleBetweenVectors_deg(
         df.gamma1_pxCM, df.gamma1_pyCM, df.gamma1_pzCM, df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM)
-    df['angle2RecoilCM_deg'] = angleBetweenVectors_deg(
+    df.loc[:, 'angle2RecoilCM_deg'] = angleBetweenVectors_deg(
         df.gamma2_pxCM, df.gamma2_pyCM, df.gamma2_pzCM, df.gammaRecoil_pxCM, df.gammaRecoil_pyCM, df.gammaRecoil_pzCM)
 
 
 def addMaxAngleCM(df):
-    df['maxAngleCM_deg'] = df.loc[:,
+    df.loc[:, 'maxAngleCM_deg'] = df.loc[:,
                            ('angle12CM_deg', 'angle1RecoilCM_deg', 'angle2RecoilCM_deg')].max(axis=1)
 
 
