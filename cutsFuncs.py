@@ -510,8 +510,7 @@ def getFilterOfCuts(df, columns):
         if 'absDeltaThetaLab12_degMin' in field:
             df['failedDeltaThetaCut'] = df[variable] < df[field]
             filt = np.logical_and(filt,
-                    df.groupby([df.entryNum.diff().ne(0).cumsum()]).failedDeltaThetaCut.transform('sum').ge(1)
-                        == False)
+                    df.groupby([df.entryNum.diff().ne(0).cumsum()]).failedDeltaThetaCut.transform('sum').eq(0))
             del df['failedDeltaThetaCut']
         elif minMax == 'Max':
             filt = np.logical_and(filt, df[variable] < df[field])
@@ -530,12 +529,14 @@ def makeCuts(df, columns):
     """
     return df[getFilterOfCuts(df, columns)]
 
-def makeSmoothCuts(df, smoothCutsSplineDf, thetaMin_deg=22.5):
+def makeSmoothCuts(df, Run, smoothCutsSplineDf, thetaMin_deg=22.5):
     df = df[alpFuncs.getTriggered(df)]
-    cutsFuncs.addSmoothedCuts(df, Run, smoothCutsSplineDf)
+    df = df[df.nTracks <=1]
+    addExtraColumns(df)
     df = df[df.minE12cm >= 0.7]
-    filtered = cutsFuncs.makeCuts(df, ['smooth_minE12cmMin', 'smooth_chi2Max',
-                                           'smooth_minAbsAcolPhiCM_degMin',
+    addSmoothedCuts(df, Run, smoothCutsSplineDf)
+    filtered = makeCuts(df, ['smooth_minE12cmMin', 'smooth_chi2Max',
+                                           'smooth_minAbsAcolPhiCM_degMin', 
                                            'smooth_absDeltaThetaLab12_degMin'])
     filtered = filtered[filtered.minTheta_deg > thetaMin_deg]
     return filtered
