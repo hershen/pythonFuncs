@@ -23,9 +23,13 @@ SCALE_SP5797_TO_DATA = {'Y2S_OffPeak': 0.212249235772358,
                         'Y4S_OffPeak': 0.678979604596849,
                         'Y4S_OnPeak': 0.656229936094144}
 
-SCALE_SP2400_TO_DATA = {'Y2S_OnPeak': 4.92927027672283,
+SCALE_SP2400_TO_DATA = {'Y2S_OffPeak':4.881377136,
+                        'Y2S_OnPeak': 4.92927027672283,
+                        'Y3S_OffPeak': 3.52962600010526,
                         'Y3S_OnPeak': 4.20954351890712,
+                        'Y4S_OffPeak': 28.9508817394704,
                         'Y4S_OnPeak': 26.3976194064715}
+
 
 
 def getMass(filename):
