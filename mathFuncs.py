@@ -141,7 +141,7 @@ def gaussExp(x, peak, sigma, tail):
     """
     x = np.asarray(x, dtype=float)
 
-    gausArg = (x - peak) / sigma if tail >= 0 else (peak - x) / sigma
+    gausArg = (x - peak) / sigma if tail <= 0 else (peak - x) / sigma
 
     absTail = abs(tail)
     return np.where(gausArg >= -absTail, np.exp(-0.5 * gausArg ** 2),
