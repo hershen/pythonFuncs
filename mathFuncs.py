@@ -522,6 +522,9 @@ def expGausExp_poln(x, params):
     polyParams = [params[i] for i in range(5, len(params))]
     return params[0] * expGaussExp(x[0], params[1], params[2], params[3], params[4]) + poly_numba(x[0], polyParams)
 
+def gaussExp_poln(x, params):
+    polyParams = [params[i] for i in range(4, len(params))]
+    return params[0] * gaussExp(x[0], params[1], params[2], params[3]) + poly_numba(x[0], np.array(polyParams))
 
 def myround(x, base=5, func=round):
     """
