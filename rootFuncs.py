@@ -30,3 +30,22 @@ def getExpGaussExp_poln_Tf1(n, rangeMin, rangeMax, name=""):
         func.SetParName(5 + i, f'p{i}')
 
     return func
+
+def isFitValid(tf1, fitResult):
+    if not fitResult.IsValid():
+        print(f'FitResult IsValid == {fitResult.IsValid()}')
+        print(fitResult.Status())
+        return False
+
+    if ROOT.gMinuit.fStatus != 0:
+        print(f'ROOT.gMinuit.fStatus = {ROOT.gMinuit.fStatus}')
+        return False
+
+#    if ROOT.gMinuit.fCstatu.rstrip() != 'CONVERGED':
+#        print(f'ROOT.gMinuit.fCstatu = {ROOT.gMinuit.fCstatu}')
+#        return False
+
+#    for iPar in range( fitResult.NPar() ):
+    
+    return True
+
