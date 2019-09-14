@@ -30,3 +30,7 @@ def deleteHdfGroups(filename, pattern):
     with pd.HDFStore(filename) as file:
         for groupToRemove in groupsToRemove:
             file.remove(groupToRemove)
+
+def reloadModule(module):
+    import importlib
+    importlib.reload(module) 
