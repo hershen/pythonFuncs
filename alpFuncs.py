@@ -16,7 +16,7 @@ SCALE_MC_TO_DATA = {'Y2S_OffPeak': 0.436278194778745,
 
 SCALE_SP1074_TO_DATA = SCALE_MC_TO_DATA
 
-SCALE_SP5797_TO_DATA = {'Y2S_OffPeak': 0.212249235772358,
+SCALE_SP7957_TO_DATA = {'Y2S_OffPeak': 0.212249235772358,
                         'Y2S_OnPeak': 0.211250957755102,
                         'Y3S_OffPeak': 0.199735021929825,
                         'Y3S_OnPeak': 0.236864720234604,
@@ -251,3 +251,13 @@ def getNumberOfGeneratedSignal(Run, alpMass):
             return 2497
     else:
         raise ValueError(f'Run {Run} not recognized')
+
+def getRelevantRangeByRunType(runType):
+    if 'Y2S' in runType:
+        return [0,10.02326*0.975]
+    elif 'Y3S' in runType:
+        return [0, 10.3552*0.975]
+    elif 'Y4S' in runType:
+        return [0,12]
+    else:
+        raise ValueError
