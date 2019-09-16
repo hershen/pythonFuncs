@@ -160,6 +160,10 @@ def gaussExpForTf1(x, params):
     return params[0] * gaussExp(x[0], params[1], params[2], params[3])
 
 
+def gaussExpNormalizationWholeRange(mean, sigma, tail):
+    #First term is regular gaussian. Second term is of the exponantial decaying.
+    return sigma*np.sqrt(np.pi/2)*(1+scipy.special.erf(np.abs(tail)/np.sqrt(2))) + sigma/np.abs(tail)*np.exp(-tail**2/2)
+
 def indicesPercentageOfMax(x, percentage):
     """
     Find last index greater than maxElement*percentage% from the left and right of maxElement - the maximum element in x
