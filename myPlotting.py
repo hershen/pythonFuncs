@@ -78,7 +78,7 @@ def saveFig(fig, filename, folder='.', subFolder='', **kwargs):
         _saveFigPickled(fig, fullFilename_noExt + '.pl')
 
 
-def saveCanvas(canvas, filename, ext='', folder=''):
+def saveCanvas(canvas, filename, ext='', folder='.', subFolder='', **kwargs):
     """
     Save a Root canvas
     :param canvas:
@@ -88,7 +88,10 @@ def saveCanvas(canvas, filename, ext='', folder=''):
     :return:
     """
 
-    fullDir = os.path.join('figureDump', folder)
+    if 'subfolder' in kwargs:
+        warnings.warn('Are you sure you didn\'t mean \'subFolder\'?')
+
+    fullDir = os.path.join(folder, 'figureDump', subFolder)
 
     # Create dir
     if not os.path.isdir(fullDir):
