@@ -4,6 +4,7 @@ import math
 from numba import njit, vectorize
 import numpy as np
 from scipy import stats
+from scipy.special import erf
 
 _sln4 = np.sqrt(np.log(4))
 
@@ -162,7 +163,7 @@ def gaussExpForTf1(x, params):
 
 def gaussExpNormalizationWholeRange(mean, sigma, tail):
     #First term is regular gaussian. Second term is of the exponantial decaying.
-    return sigma*np.sqrt(np.pi/2)*(1+scipy.special.erf(np.abs(tail)/np.sqrt(2))) + sigma/np.abs(tail)*np.exp(-tail**2/2)
+    return sigma*np.sqrt(np.pi/2)*(1+erf(np.abs(tail)/np.sqrt(2))) + sigma/np.abs(tail)*np.exp(-tail**2/2)
 
 def indicesPercentageOfMax(x, percentage):
     """
