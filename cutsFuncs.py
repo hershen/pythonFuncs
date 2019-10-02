@@ -548,3 +548,12 @@ def getColumnsForCuts():
             'gamma1_pz', 'gamma1_energy', 'gamma2_px', 'gamma2_py',
             'gamma2_pz', 'gamma2_energy', 'gammaRecoil_px', 'gammaRecoil_py',
             'gammaRecoild_pz', 'gammmaRecoil_energy']
+
+def getWindowSize10percentDf(folder='/home/hershen/PhD/ALPs/analysis/cuts/calcCountingWindow/signalWidthPercantageOfPeak/'):
+    dfs = []
+    for Run in ['1-6', '7']:
+        filename = os.path.join(folder, f'rangeAs10PercentOfPeak_Run{Run}.csv')
+        tmpDf = pd.read_csv(filename)
+        tmpDf['Run'] = Run
+        dfs.append(tmpDf)
+    return pd.concat(dfs)
