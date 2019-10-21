@@ -542,7 +542,7 @@ def makeSmoothCuts(df, Run, smoothCutsSplineDf, thetaMin_deg=22.5):
     return filtered
 
 def getColumnsForCuts():
-    columns = ['entryNum', 'L3OutGammaGamma', 'DigiFGammaGamma',
+    return ['entryNum', 'L3OutGammaGamma', 'DigiFGammaGamma',
             'DigiFSingleGamma', ' BGFSingleGammaPair', 'L3OutDch', 'L3OutEmc',
             'nTrakcs', 'chi2', 'eta_Mass', 'gamma1_px', 'gamma1_py',
             'gamma1_pz', 'gamma1_energy', 'gamma2_px', 'gamma2_py',
