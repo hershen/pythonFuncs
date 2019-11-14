@@ -529,25 +529,29 @@ def makeCuts(df, columns):
     """
     return df[getFilterOfCuts(df, columns)]
 
-def makeSmoothCuts(df, Run, smoothCutsSplineDf, thetaMin_deg=22.5):
+def makeSmoothCuts(df, Run, smoothCutsSplineDf, thetaMin_deg=22.5,
+        shouldAddExtraColumns=True, smoothedCutsToMake = ['smooth_minE12cmMin', 'smooth_chi2Max', 'smooth_minAbsAcolPhiCM_degMin',
+                                                  'smooth_absDeltaThetaLab12_degMin']):
     df = df[alpFuncs.getTriggered(df)]
     df = df[df.nTracks <=1]
-    addExtraColumns(df)
+    if shouldAddExtraColumns:
+        addExtraColumns(df)
     df = df[df.minE12cm >= 0.7]
     addSmoothedCuts(df, Run, smoothCutsSplineDf)
-    filtered = makeCuts(df, ['smooth_minE12cmMin', 'smooth_chi2Max',
-                                           'smooth_minAbsAcolPhiCM_degMin', 
-                                           'smooth_absDeltaThetaLab12_degMin'])
+    filtered = makeCuts(df, smoothedCutsToMake)
     filtered = filtered[filtered.minTheta_deg > thetaMin_deg]
     return filtered
 
 def getColumnsForCuts():
     return ['entryNum', 'L3OutGammaGamma', 'DigiFGammaGamma',
-            'DigiFSingleGamma', ' BGFSingleGammaPair', 'L3OutDch', 'L3OutEmc',
-            'nTrakcs', 'chi2', 'eta_Mass', 'gamma1_px', 'gamma1_py',
-            'gamma1_pz', 'gamma1_energy', 'gamma2_px', 'gamma2_py',
-            'gamma2_pz', 'gamma2_energy', 'gammaRecoil_px', 'gammaRecoil_py',
-            'gammaRecoild_pz', 'gammmaRecoil_energy']
+            'DigiFSingleGamma', 'BGFSingleGammaPair', 'BGFSingleGammaInvisible', 'L3OutDch', 'L3OutEmc',
+            'nTracks', 'chi2', 'eta_Mass', 
+            'gamma1_px', 'gamma1_py', 'gamma1_pz', 'gamma1_energy', 
+            'gamma1_pxCM', 'gamma1_pyCM', 'gamma1_pzCM', 'gamma1_energyCM', 
+            'gamma2_px', 'gamma2_py', 'gamma2_pz', 'gamma2_energy', 
+            'gamma2_pxCM', 'gamma2_pyCM', 'gamma2_pzCM', 'gamma2_energyCM', 
+            'gammaRecoil_px', 'gammaRecoil_py', 'gammaRecoil_pz', 'gammaRecoil_energy',
+            'gammaRecoil_pxCM', 'gammaRecoil_pyCM', 'gammaRecoil_pzCM']
 
 def getWindowSize10percentDf(folder='/home/hershen/PhD/ALPs/analysis/cuts/calcCountingWindow/signalWidthPercantageOfPeak/'):
     dfs = []
