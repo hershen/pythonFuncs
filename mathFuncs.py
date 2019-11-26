@@ -555,3 +555,15 @@ def rebin(tops, bins, n):
     groupedTops = tops.reshape(-1, n).sum(axis=1)
     groupedBins = bins[::n]
     return groupedTops, groupedBins
+
+class PolySpline(object):
+    def __init__(self, polys, ranges):
+        self.polys = np.array([np.poly1d(poly) for poly in polys])
+        self.ranges = ranges
+    def __call__(self, x):
+        if np.ndim(x) == 0:
+            return self._eval(x)
+        return [self._eval(xi) for xi in x]
+    def _eval(self, x):
+        index = np.searchsorted(self.ranges, x, side='right') - 1 #-1 because index 0 is for searchsorted=1, for example
+        return self.polys[index](x)
