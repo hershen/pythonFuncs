@@ -567,3 +567,33 @@ class PolySpline(object):
     def _eval(self, x):
         index = np.searchsorted(self.ranges, x, side='right') - 1 #-1 because index 0 is for searchsorted=1, for example
         return self.polys[index](x)
+
+
+class Hist_chebyshev:
+    """
+    Used to create TF1.
+
+    params[0] Scales histogram.
+    params[1:] Are the Chebyshev coefficients. The length determines how many polynomials are used.
+    
+    Note - Histogram is normailized to have area 1 (taking bin width into
+    account) in the effective range of the histogram.
+
+    Note - Domain of Chebyshev polynomials is scaled to hist effective range.
+    This means they're orthogonal in that range.
+    """
+    def __init__(self, hist):
+        self.hist = hist
+        try:
+            self.hist.Scale(1/self.hist.Integral("width"))
+        except ZeroDivisionError:
+            pass
+        self.domain = [self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetFirst()), 
+                       self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetLast())]
+        self.scaleA = sum(self.domain)/(self.domain[0] - self.domain[1])
+        self.scaleB = 2/(self.domain[1] - self.domain[0])
+#         print(self.domain, self.scaleA, self.scaleB)
+        
+    def __call__(self, x, params):        
+        return params[0]*self.hist.Interpolate(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
+        
