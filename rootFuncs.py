@@ -48,3 +48,8 @@ def isFitValid(tf1, fitResult):
 
     return True
 
+def getTf1Range(tf1):
+    minRange = ROOT.Double(0)
+    maxRange = ROOT.Double(0)
+    tf1.GetRange(minRange, maxRange)
+    return [minRange, maxRange]
