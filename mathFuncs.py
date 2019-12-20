@@ -585,7 +585,7 @@ class Hist_chebyshev:
     def __init__(self, hist):
         self.hist = hist
         try:
-            self.hist.Scale(1/self.hist.Integral("width"))
+            self.hist.Scale(1/self.hist.Integral())
         except ZeroDivisionError:
             pass
         self.domain = [self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetFirst()), 
