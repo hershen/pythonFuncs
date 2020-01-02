@@ -576,8 +576,8 @@ class Hist_chebyshev:
     params[0] Scales histogram.
     params[1:] Are the Chebyshev coefficients. The length determines how many polynomials are used.
     
-    Note - Histogram is normailized to have area 1 (taking bin width into
-    account) in the effective range of the histogram.
+    Note - Histogram is normailized to have area 1 in the x range of the x axis
+    - changing x axis range will change the normalization.
 
     Note - Domain of Chebyshev polynomials is scaled to hist effective range.
     This means they're orthogonal in that range.
@@ -592,7 +592,7 @@ class Hist_chebyshev:
                        self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetLast())]
         self.scaleA = sum(self.domain)/(self.domain[0] - self.domain[1])
         self.scaleB = 2/(self.domain[1] - self.domain[0])
-#         print(self.domain, self.scaleA, self.scaleB)
+        #print(self.domain, self.scaleA, self.scaleB)
         
     def __call__(self, x, params):        
         return params[0]*self.hist.Interpolate(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
