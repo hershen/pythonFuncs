@@ -31,8 +31,6 @@ def test_loadDF(tmpdir):
     # create dataframe
     numpyArray = np.array([(1, 2.5, 3.4), (4, 5, 6.8)], dtype=[('a', np.float), ('b', np.float32), ('c', np.float64)])
     df = pd.DataFrame(numpyArray)
-    df.index.name='entry' # To make the name of the index the same as after the
-                            #    array2root
 
     # write dataframe
     tempFile = tmpdir.join("pandas.root")
