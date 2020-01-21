@@ -180,14 +180,14 @@ def test_novosibirskForTf1():
 
 
 def test_gaussExp():
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, 0) == 6.065306597126334236
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, 0.5) == 6.065306597126334236
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, 1.01) == 6.065306597126334236
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0) == 6.06530659712633423604
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0.1) == 9.09372934468231420493
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, 0), 6.065306597126334236)
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, 0.5), 6.065306597126334236)
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, 1.01), 6.065306597126334236)
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -0), 6.06530659712633423604)
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -0.1), 9.09372934468231420493)
     assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -0.5), 6.8728927879097219855)
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, -0.7) == 6.344479679482281821
-    assert 10 * mathFuncs.gaussExp(1, 0, 1, -2) == 6.06530659712633423604
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -0.7), 6.344479679482281821)
+    assert np.isclose(10 * mathFuncs.gaussExp(1, 0, 1, -2), 6.06530659712633423604)
 
 
 def test_gaussExpForTf1():
