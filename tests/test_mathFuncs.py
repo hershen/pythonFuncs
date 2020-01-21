@@ -452,3 +452,13 @@ def test_idxFirstToLeft():
     assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 3) == None
     assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 6, startingIdx=5) == None
     assert mathFuncs.idxFirstToLeft(_dataForIdxSearchingFunctions, operator.gt, 4, startingIdx=12) == 10
+
+def test_InterpolateHist():
+    hist = ROOT.TH1D("hist", "", 100, -5, 5)
+    hist.FillRandom('gaus', 1000)
+    hist.GetXaxis().SetRangeUser(-1, 1)
+    tf1Object = mathFuncs.InterpolateHist(hist)
+
+    assert np.isclose(hist.Integral(), 1)
+
+    del hist
