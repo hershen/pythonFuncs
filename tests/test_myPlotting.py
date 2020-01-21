@@ -57,7 +57,7 @@ def test_getXvalues():
 
 def test_saveFig(tmpdir):
     # create figure
-    fig, _ = plt.subplots()
+    fig, _ = plt.subplots(dpi=300)
     plt.plot([0, 1, 2], [2, 4, 6])
 
     # save png
