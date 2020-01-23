@@ -623,9 +623,10 @@ class Hist_chebyshev:
         self.scaleA = sum(self.domain)/(self.domain[0] - self.domain[1])
         self.scaleB = 2/(self.domain[1] - self.domain[0])
 
+        #Fix N_s to 1 and I'll normalize by myself.
+
     def __call__(self, x, params):
-        self.tf1Hist.SetParameter(0, params[0])
-        return self.tf1Hist.Eval(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
+        return params[0]*self.tf1Hist.Eval(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
 
 #class Hist_chebyshev:
 #    """
