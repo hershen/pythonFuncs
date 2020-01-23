@@ -31,6 +31,14 @@ SCALE_SP2400_TO_DATA = {'Y2S_OffPeak':4.881377136,
                         'Y4S_OnPeak': 26.3976194064715}
 
 
+LUMI_FULL_DATASET_FB = {'Y2S_OffPeak': 1.41884,
+                        'Y2S_OnPeak': 13.560651,
+                        'Y3S_OffPeak': 2.602262,
+                        'Y3S_OnPeak': 27.852024,
+                        'Y4S_OffPeak': 43.922002,
+                        'Y4S_OnPeak': 424.290696,
+                        'Run7_OffPeak': 4.021102,
+                        'Run7_OnPeak': 41.412675}
 
 def getMass(filename):
     """Return mass from the filename"""
