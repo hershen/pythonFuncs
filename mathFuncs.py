@@ -577,27 +577,29 @@ class InterpolateHist:
 
     params[0] Scales histogram.
     
-    Note - Histogram is normailized to have area 1 in the x range of the x axis
-    - changing x axis range will change the normalization.
-
-    Note - The integral is done between GetXaxis().GetFirst(), and
-    GetXaxis().GetLast(). This range doesn't neccessarily coincide with the
-    range when the histogram is drawn - if the SetRangeUser is chosen to
-    coincide with a bin edge, the integral is up to the lower edge of the
-    previous bin, whereas the drawn range is up to the bin that includes the
-    max range.
-
-    Note - Due to the previous note, use only GetFirst, GetLast to determine
-    the relevant range.
     """
     def __init__(self, hist):
         self.hist = hist
+
+    def normalize(self, value=1):
+        """
+        Normalize number of entries in the xrange of the x axis to 1 (NOT
+        AREA!!!). Changing the x axis range will change the normalization.
+
+        Note - The integral is done between GetXaxis().GetFirst(), and
+        GetXaxis().GetLast(). This range doesn't neccessarily coincide with the
+        range when the histogram is drawn - if the SetRangeUser is chosen to
+        coincide with a bin edge, the integral is up to the lower edge of the
+        previous bin, whereas the drawn range is up to the bin that includes the
+        max range.
+
+        Note - Due to the previous note, use only GetFirst, GetLast to determine
+        the relevant range.
+        """
         try:
-            self.hist.Scale(1/self.hist.Integral())
+            self.hist.Scale(value/self.hist.Integral())
         except ZeroDivisionError:
             pass
-    #    self.domain = [self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetFirst()), 
-    #                   self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetLast())]
         
     def __call__(self, x, params):        
         return params[0]*self.hist.Interpolate(x[0])
@@ -615,6 +617,8 @@ class Hist_chebyshev:
 
     def __init__(self, hist):
         self.interpolateHist = InterpolateHist(hist)
+        self.interpolateHist.normalize(1)
+
         self.domain = [hist.GetXaxis().GetBinLowEdge(hist.GetXaxis().GetFirst()),
                        hist.GetXaxis().GetBinLowEdge(hist.GetXaxis().GetLast())]                       
         self.tf1Hist = ROOT.TF1("tf1Hist", self.interpolateHist, *self.domain, 1)
@@ -628,31 +632,3 @@ class Hist_chebyshev:
     def __call__(self, x, params):
         return params[0]*self.tf1Hist.Eval(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
 
-#class Hist_chebyshev:
-#    """
-#    Used to create TF1.
-#
-#    params[0] Scales histogram.
-#    params[1:] Are the Chebyshev coefficients. The length determines how many polynomials are used.
-#    
-#    Note - Histogram is normailized to have area 1 in the x range of the x axis
-#    - changing x axis range will change the normalization.
-#
-#    Note - Domain of Chebyshev polynomials is scaled to hist effective range.
-#    This means they're orthogonal in that range.
-#    """
-#    def __init__(self, hist):
-#        self.hist = hist
-#        try:
-#            self.hist.Scale(1/self.hist.Integral())
-#        except ZeroDivisionError:
-#            pass
-#        self.domain = [self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetFirst()), 
-#                       self.hist.GetXaxis().GetBinLowEdge(self.hist.GetXaxis().GetLast())]
-#        self.scaleA = sum(self.domain)/(self.domain[0] - self.domain[1])
-#        self.scaleB = 2/(self.domain[1] - self.domain[0])
-#        #print(self.domain, self.scaleA, self.scaleB)
-#        
-#    def __call__(self, x, params):        
-#        return params[0]*self.hist.Interpolate(x[0]) + np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[1:])
-        
