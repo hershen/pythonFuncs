@@ -238,7 +238,6 @@ def getAlpMasses(Run='all'):
 
 _massesWith10ksignalEvents = [0.02, 0.05, 0.1, 0.135, 0.4]
 
-
 def getNumberOfGeneratedSignal(Run, alpMass):
     if Run == '1-6':
         return 49965
@@ -259,6 +258,44 @@ def getNumberOfGeneratedSignal(Run, alpMass):
             return 2497
     else:
         raise ValueError(f'Run {Run} not recognized')
+
+_nonNominalGeneratedEvents_Y4S = {1.98: 49947, 6.71: 49410, 4.72: 48299, 4.83: 49448, 7.60: 49105, 6.17: 48210, 7.59: 49417, 9.79: 48870, 5.84: 49030, 8.59: 48234, 4.37: 49755,
+                                  5.99: 49843, 0.27: 49796, 8.90: 49539, 4.80: 49961, 9.09: 49097, 7.91: 49780, 2.38: 49612, 4.22: 49178, 0.58: 49696, 7.42: 48781, 9.94: 49843,
+                                  5.82: 49891, 6.67: 49311, 8.47: 49883, 5.07: 49496, 3.99: 49168, 8.68: 48801, 8.39: 49585, 8.61: 48716, 3.63: 48829, 9.24: 49828, 4.20: 48924,
+                                  9.16: 48671, 0.46: 49696, 9.59: 49483, 10.15: 49105, 10.14: 49243}
+_nonNominalGeneratedMasses = np.array(list(_nonNominalGeneratedEvents_Y4S.keys()))
+_nonNominalGeneratedEvents= np.array(list(_nonNominalGeneratedEvents_Y4S.values()))
+def getNumberOf10MeVresuotionGeneratedSignal(YnS, alpMass):
+    if not isinstance(alpMass, float):
+        raise ValueError(f'alpMass is expected to be float')
+
+    if YnS == 'Y2S':
+        if np.isclose(alpMass, 4.29):
+            return 9136
+        elif np.isclose(alpMass, 4.81):
+            return 3353
+        elif np.isclose(alpMass, 6.97):
+            return 2143
+        else:
+            return 10000
+    elif YnS == 'Y3S':
+        if np.isclose(alpMass, 2.11):
+            return 9969
+        elif np.isclose(alpMass, 2.92):
+            return 8802
+        elif np.isclose(alpMass, 6.65):
+            return 8478
+        else:
+            return 9996
+    elif YnS == 'Y4S':
+        closeToNonNominal = np.isclose(_nonNominalGeneratedMasses, alpMass) 
+        if np.any(closeToNonNominal):
+            index = np.argmax(closeToNonNominal)
+            return _nonNominalGeneratedEvents[index]
+        else:
+            return 49965
+    else:
+        raise ValueError(f'Run {YnS} not recognized')
 
 def getRelevantRangeByRunType(runType):
     if 'Y2S' in runType:
