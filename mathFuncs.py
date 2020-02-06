@@ -87,7 +87,7 @@ def effError(nom, denom):
     nom, denom = np.asarray(nom, dtype=float), np.asarray(denom)
     eff = nom / denom
 
-    return np.sqrt(eff * (1 - eff) / denom)
+    return np.sqrt(eff * (1 - eff) / (denom-1))
 
 
 def _sigmaZero(tail):
