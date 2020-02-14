@@ -487,3 +487,7 @@ def getOptimalRange(lowEdge, highEdge, nBins, binWidths):
     newRange = newBinWidth * nBins
     deltaRange = newRange - oldRange
     return [lowEdge - deltaRange / 2, highEdge + deltaRange / 2]
+
+def hist_binned(tops, edges, **args):
+    binCenters = mathFuncs.listCenters(edges)
+    return matplotlib.pyplot.hist(binCenters, bins=edges, weights=tops, **args)
