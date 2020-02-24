@@ -310,5 +310,5 @@ def getRelevantRangeByRunType(runType):
 def chebyshevDegree(mass, df):
     idx = np.argmax(mass<df.edges.values)
     if df.edges.values[idx-1] <= mass < df.edges.values[idx]:
-        return int(df.chibyshevDegree.values[idx-1])
+        return int(df.chebyshevDegree.values[idx-1])
     return -1
