@@ -713,3 +713,52 @@ class Hist_omega_eta_phi_chebyshev:
                params[3]*ROOT.TMath.Gaus(x[0], self.phiMean, self.phiStd, True) + 
                np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[4:]) )
 
+class Hist_omega_pi0_eta_phi_chebyshev:
+    """
+    Hist+Chebyshev as background
+
+    params[0] Scales histogram.
+    params[1] scale of omega component
+    params[2] area under pi0 gaussian
+    params[3] area under eta gaussian
+    params[4] area under phi gaussian
+    params[5:] Are the Chebyshev coefficients. The length determines how many polynomials are used.
+
+    Note - Domain of Chebyshev polynomials is scaled to hist effective range.
+    This means they're orthogonal in that range.
+    """
+
+    def __init__(self, signalHist, omegaHist, pi0Mean, pi0Std, etaMean, etaStd, phiMean, phiStd):
+        self.pi0Mean = pi0Mean
+        self.pi0Std = pi0Std
+        self.etaMean = etaMean
+        self.etaStd = etaStd
+        self.phiMean = phiMean
+        self.phiStd = phiStd
+
+        self.interpolateSignalHist = InterpolateHist(signalHist)
+        self.interpolateSignalHist.normalize(1)
+
+        self.interpolateOmegaHist = InterpolateHist(omegaHist)
+        #Assume omega hist already normalized
+
+        self.domain = [signalHist.GetXaxis().GetBinLowEdge(signalHist.GetXaxis().GetFirst()),
+                       signalHist.GetXaxis().GetBinLowEdge(signalHist.GetXaxis().GetLast())]                       
+        self.tf1signalHist = ROOT.TF1("tf1signalHist", self.interpolateSignalHist, *self.domain, 1)
+        self.tf1signalHist.SetParameter(0,1)
+
+        self.tf1omegaHist = ROOT.TF1("tf1omegaHist", self.interpolateOmegaHist, *self.domain, 1)
+        self.tf1omegaHist.SetParameter(0,1)
+        
+        self.scaleA = sum(self.domain)/(self.domain[0] - self.domain[1])
+        self.scaleB = 2/(self.domain[1] - self.domain[0])
+
+        #Fix N_s to 1 and I'll normalize by myself.
+
+    def __call__(self, x, params):
+        return (params[0]*self.tf1signalHist.Eval(x[0]) +
+               params[1]*self.tf1omegaHist.Eval(x[0]) + 
+               params[2]*ROOT.TMath.Gaus(x[0], self.pi0Mean, self.pi0Std, True) +
+               params[3]*ROOT.TMath.Gaus(x[0], self.etaMean, self.etaStd, True) + 
+               params[4]*ROOT.TMath.Gaus(x[0], self.phiMean, self.phiStd, True) + 
+               np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[5:]) )
