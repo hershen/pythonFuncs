@@ -329,3 +329,6 @@ def getIdealFitRange(branchName, rebin, numOnSides=2):
     upperLimit = np.around((mass + signalUpperLimit + numOnSides*signalWindow)/rebin, decimals=3)*rebin
     lowerLimit = max(0, np.around((mass + signalLowerLimit - numOnSides*signalWindow)/rebin, decimals=3)*rebin)
     return [lowerLimit, upperLimit]
+
+def getYnS(text):
+    return re.search('Y([2-4])S', text).group(0)
