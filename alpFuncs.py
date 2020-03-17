@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import re
+import pickle as pl
 import uproot
 import pandas as pd
 import glob
@@ -312,3 +313,19 @@ def chebyshevDegree(mass, df):
     if df.edges.values[idx-1] <= mass < df.edges.values[idx]:
         return int(df.chebyshevDegree.values[idx-1])
     return -1
+
+
+def getWindowLimitPolynomials():
+    return pl.load(open('/home/hershen/PhD/ALPs/analysis/cuts/calcCountingWindow/signalWidthPercantageOfPeak/windowPolynomials.pl', 'rb'))
+
+def getIdealFitRange(branchName, rebin, numOnSides=2):
+    YnS = branchName.split('_')[1]
+    mass = float(getMass(branchName))
+    windowLimitPolynomials = getWindowLimitPolynomials()
+    signalUpperLimit = windowLimitPolynomials[f'{YnS} upper limit'](mass)
+    signalLowerLimit = windowLimitPolynomials[f'{YnS} lower limit'](mass)
+    signalWindow =  signalUpperLimit - signalLowerLimit
+
+    upperLimit = np.around((mass + signalUpperLimit + numOnSides*signalWindow)/rebin, decimals=3)*rebin
+    lowerLimit = max(0, np.around((mass + signalLowerLimit - numOnSides*signalWindow)/rebin, decimals=3)*rebin)
+    return [lowerLimit, upperLimit]
