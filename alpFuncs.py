@@ -41,15 +41,6 @@ LUMI_FULL_DATASET_FB = {'Y2S_OffPeak': 1.41884,
                         'Run7_OffPeak': 4.021102,
                         'Run7_OnPeak': 41.412675}
 
-def getMass(filename):
-    """Return mass from the filename"""
-
-    # remove up to 'mass'
-    filename = filename[filename.find('mass') + 4:]
-
-    return filename[:filename.find('_')]
-
-
 def getRun(filename):
     """Return Run from the filename"""
 
@@ -318,9 +309,9 @@ def chebyshevDegree(mass, df):
 def getWindowLimitPolynomials():
     return pl.load(open('/home/hershen/PhD/ALPs/analysis/cuts/calcCountingWindow/signalWidthPercantageOfPeak/windowPolynomials.pl', 'rb'))
 
-def getIdealFitRange(branchName, rebin, numOnSides=2):
-    YnS = branchName.split('_')[1]
-    mass = float(getMass(branchName))
+def getIdealFitRange(text, rebin, numOnSides=2):
+    YnS = getYnS(text)
+    mass = float(getMass(text))
     windowLimitPolynomials = getWindowLimitPolynomials()
     signalUpperLimit = windowLimitPolynomials[f'{YnS} upper limit'](mass)
     signalLowerLimit = windowLimitPolynomials[f'{YnS} lower limit'](mass)
@@ -332,3 +323,10 @@ def getIdealFitRange(branchName, rebin, numOnSides=2):
 
 def getYnS(text):
     return re.search('Y([2-4])S', text).group(0)
+
+def getMass(filename):
+    """Return mass from the filename"""
+
+    return re.search('[1-9].[0-9]*e[+-]0[01]', filename).group(0)
+
+
