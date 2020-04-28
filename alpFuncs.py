@@ -329,4 +329,7 @@ def getMass(filename):
 
     return re.search('[1-9].[0-9]*e[+-]0[01]', filename).group(0)
 
+#Calculate g from cross section and madgraph's cross section
+def g(crossSection, crossSectionMadgraph, gMadgraph=1e-3):
+    return np.sqrt(crossSection * gMadgraph**2 / crossSectionMadgraph)
 
