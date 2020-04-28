@@ -42,7 +42,7 @@ def isFitValid(tf1, fitResult):
             print(f'ROOT.gMinuit.fStatus = {ROOT.gMinuit.fStatus}')
             return False
 
-        if ROOT.gMinuit.fCstatu.rstrip() != 'CONVERGED':
+        if ROOT.gMinuit.fCstatu.rstrip() != 'CONVERGED' and ROOT.gMinuit.fCstatu.rstrip() != 'SUCCESSFUL':
             print(f'ROOT.gMinuit.fCstatu = {ROOT.gMinuit.fCstatu}')
             return False
 
