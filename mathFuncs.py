@@ -762,3 +762,7 @@ class Hist_omega_pi0_eta_phi_chebyshev:
                params[3]*ROOT.TMath.Gaus(x[0], self.etaMean, self.etaStd, True) + 
                params[4]*ROOT.TMath.Gaus(x[0], self.phiMean, self.phiStd, True) + 
                np.polynomial.chebyshev.chebval(self.scaleA + self.scaleB*x[0], list(params)[5:]) )
+
+
+def chi2Prob(chi2, ndof):
+    return stats.chi2.sf(chi2, ndof)
