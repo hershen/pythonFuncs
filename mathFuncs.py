@@ -81,6 +81,8 @@ def effError(nom, denom):
     """Calculate efficiency error using binomial distribution
     eff = nom / denom
 
+    Based on formula in https://bbr-wiki.slac.stanford.edu/bbr_wiki/index.php/Statistics_FAQ
+
     Does not represent errors close to 0 or 1!!!
     Can be extended to include edge cases with CDF note 5894"""
 
