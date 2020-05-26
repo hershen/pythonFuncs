@@ -4,7 +4,7 @@ import math
 from numba import njit, vectorize
 import numpy as np
 from scipy import stats
-from scipy.special import erf
+from scipy.special import erf, erfinv
 
 import ROOT
 
@@ -766,3 +766,6 @@ class Hist_omega_pi0_eta_phi_chebyshev:
 
 def chi2Prob(chi2, ndof):
     return stats.chi2.sf(chi2, ndof)
+
+def getGausUpperLimit(mu, std, targetArea=0.9):
+    return mu + np.sqrt(2)*std*erfinv(targetArea + (targetArea-1)*erf(mu/np.sqrt(2)/std))
