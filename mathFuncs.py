@@ -774,3 +774,9 @@ def getGausUpperLimit(mu, std, targetArea=0.9):
 
 def areaUnderGaus(xLow, xHigh, mean, sigma):
     return stats.norm.cdf(xHigh, loc=mean, scale=sigma) - stats.norm.cdf(xLow, loc=mean, scale=sigma) 
+
+def multiplyGaussianExponents(mu1, s1, mu2, s2):
+    coefficient = np.exp(-0.5*(mu1-mu2)**2/(s1**2+s2**2))
+    newMu = (mu1*s2**2+mu2*s1**2)/(s1**2+s2**2)
+    newSigma = s1*s2/np.sqrt(s1**2+s2**2)
+    return coefficient, newMu, newSigma
