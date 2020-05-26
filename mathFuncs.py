@@ -771,3 +771,6 @@ def chi2Prob(chi2, ndof):
 
 def getGausUpperLimit(mu, std, targetArea=0.9):
     return mu + np.sqrt(2)*std*erfinv(targetArea + (targetArea-1)*erf(mu/np.sqrt(2)/std))
+
+def areaUnderGaus(xLow, xHigh, mean, sigma):
+    return stats.norm.cdf(xHigh, loc=mean, scale=sigma) - stats.norm.cdf(xLow, loc=mean, scale=sigma) 
