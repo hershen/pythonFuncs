@@ -41,6 +41,11 @@ LUMI_FULL_DATASET_FB = {'Y2S_OffPeak': 1.41884,
                         'Run7_OffPeak': 4.021102,
                         'Run7_OnPeak': 41.412675}
 
+COLOR = {'Y2S': 'C1',
+         'Y3S': 'C2',
+         'Y4S': 'C0'}
+
+
 def getRun(filename):
     """Return Run from the filename"""
 
@@ -333,3 +338,7 @@ def getMass(filename):
 def g(crossSection, crossSectionMadgraph, gMadgraph=1e-3):
     return np.sqrt(crossSection * gMadgraph**2 / crossSectionMadgraph)
 
+def getTotalNsUncert(NsStatUncert, alternateFitResultsDf, YnS, mass):
+    chebBias = abs(alternateFitResultsDf.loc[(YnS, mass), 'nominal'] - alternateFitResultsDf.loc[(YnS, mass), 'chebPlus1'])
+    fitRangeBias = abs(alternateFitResultsDf.loc[(YnS, mass), 'nominal'] - alternateFitResultsDf.loc[(YnS, mass), '2.5sides'])
+    return np.sqrt(NsStatUncert**2 + chebBias**2 + fitRangeBias**2)
