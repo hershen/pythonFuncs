@@ -169,11 +169,12 @@ def gaussExpNormalizationWholeRange(mean, sigma, tail):
     #First term is regular gaussian. Second term is of the exponantial decaying.
     return sigma*np.sqrt(np.pi/2)*(1+erf(np.abs(tail)/np.sqrt(2))) + sigma/np.abs(tail)*np.exp(-tail**2/2)
 
-def indicesPercentageOfMax(x, percentage):
+def indicesPercentageOfMax(x, percentage, threshold=None):
     """
     Find last index greater than maxElement*percentage% from the left and right of maxElement - the maximum element in x
     :param x: list of numbers
     :param percentage: percentage out of 100
+    :param if threshold is provided, ignore percentage
     :return: lowIdx, highIdx
     """
     x = np.asarray(x)
@@ -181,7 +182,8 @@ def indicesPercentageOfMax(x, percentage):
     if np.abs(maxElement) < 1e-7:
         raise ValueError("Maximum element is {}. This won't work.".format(np.abs(maxElement)))
 
-    threshold = percentage / 100. * x[maxElement]
+    if not threshold:
+        threshold = percentage / 100. * x[maxElement]
 
     # start searching from maximum element
 
